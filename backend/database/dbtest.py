@@ -17,4 +17,5 @@ def add(rds_client, username=random.randint(1000000,9999999)):
 
 client = boto3.client('rds-data', region_name='us-east-1')
 
-add(client)
+if __name__ == "__main__":
+    add(client)
