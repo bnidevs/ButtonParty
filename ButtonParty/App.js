@@ -1,29 +1,31 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { TouchableHighlight, StyleSheet, View, Text, Button } from 'react-native'
 
-const AppButton = ({ onPress, title }) => (
-  <TouchableHighlight 
-    activeOpacity={.8}
-    underlayColor="#db0000"
-    onPress={onPress} 
-    style={styles.appButtonContainer}
-  >
-    <Text style={styles.appButtonText}>{title}</Text>
-  </TouchableHighlight>
-);
+const AppButton = ({ onPress, title }) => {
+  return (
+    <TouchableHighlight 
+      activeOpacity={.8}
+      underlayColor="#db0000"
+      onPress={onPress}
+      style={styles.appButtonContainer}
+    >
+      <Text style={styles.appButtonText}>{title}</Text>
+    </TouchableHighlight>
+  );
+};
 
 const App = () => {
   const [points, setPoints] = useState(0);
   const onPress = () => (
-    
+    //Do database stuff here
     setPoints(prevCount => prevCount + 1)
   );
 
   return (
     <View style = {styles.container}>
-      <AppButton onPress = {onPress} title="Button Party"/>
-      <Text style={styles.points}>Points: {points}</Text>
+      <AppButton onPress={onPress} title="Button Party"/>
+      <Text style={styles.points}>{points ? points : null}</Text>
     </View>
  )
 }
