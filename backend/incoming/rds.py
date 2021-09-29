@@ -1,5 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath('../'))
 import json
-import boto3
 import random
 
 def add_user_to_RDS(rds_client, username=random.randint(1000000,9999999)):
