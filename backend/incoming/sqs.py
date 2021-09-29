@@ -1,5 +1,7 @@
 import json
-import boto3
+import sys
+import os
+sys.path.append(os.path.abspath('../'))
 
 from constants import QUEUE_URL, REGION, RDS_CLIENT, SQS_CLIENT
 from rds import add_user_to_RDS
