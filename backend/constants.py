@@ -19,7 +19,7 @@ RDS_CLIENT = client('rds-data', region_name=REGION)
 SQS_CLIENT = client('sqs', region_name=REGION)
 
 # SNS ARN
-SNS_ARN = 'arn:aws:sns:us-east-1:291201070981:ButtonPartyNotificationTest'
+SNS_ARN = 'INSERT SNS ARN'
 
 # SNS CLIENT
 SNS_CLIENT = client('sns', region_name=REGION)
