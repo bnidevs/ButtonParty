@@ -83,6 +83,27 @@ project.ext.react = [
 
 apply from: "../../node_modules/react-native/react.gradle"
 
+
+
+
+/*Adding Firebase SDK*/
+apply plugin: 'com.android.application'
+
+apply plugin: 'com.google.gms.google-services'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
@@ -179,6 +200,10 @@ android {
 }
 
 dependencies {
+    //import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:28.4.1'){
+            
+    }
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
