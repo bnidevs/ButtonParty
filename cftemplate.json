@@ -1,0 +1,153 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+	"Parameters" : {
+	    "KeyName": {
+	      	"Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+	      	"Type": "AWS::EC2::KeyPair::KeyName",
+	      	"ConstraintDescription" : "must be the name of an existing EC2 KeyPair"
+	    }
+   	},
+	"Resources" : {
+	    "outgoingTrafficHandler" : {
+	      	"Type" : "AWS::EC2::Instance",
+		    "Properties" : {
+		        "InstanceType" : "t2.micro",
+		        "SecurityGroups" : [ 
+		        	{ 
+		        		"Ref" : "defaultSecurityGroup" 
+		        	} 
+		        ],
+		        "KeyName" : { 
+		        	"Ref" : "KeyName" 
+		        },
+		        "ImageId" : "ami-0cfc05f17eac80275"
+	      	},
+	      	"Metadata": {
+	      		"Title": "OUTGOING TRAFFIC HANDLER",
+	      		"Purpose": [
+	      			"this instance sends messages to the SNS to be distributed as push notifs",
+	      			"it will also pass timestamps to the incoming-traffic-handler"
+	      		]
+	      	}
+	    },
+	    "incomingTrafficHandler" : {
+	      	"Type" : "AWS::EC2::Instance",
+		    "Properties" : {
+		        "InstanceType" : "t3.small",
+		        "SecurityGroups" : [ 
+		        	{ 
+		        		"Ref" : "defaultSecurityGroup" 
+		        	} 
+		        ],
+		        "KeyName" : { 
+		        	"Ref" : "KeyName" 
+		        },
+		        "ImageId" : "ami-0cfc05f17eac80275"
+	      	},
+	      	"Metadata": {
+	      		"Title": "INCOMING TRAFFIC HANDLER",
+	      		"Purpose": [
+	      			"this instance handles api calls and writes to the database",
+	      			"it will also injest timestamps from the outgoing-traffic-handler"
+	      		],
+	      		"Note": "FUTURE UPDATE: THIS SHOULD BE PLACED INTO AN AUTO SCALING GROUP"
+	      	}
+	    },
+	    "defaultSecurityGroup": {
+	      	"Type": "AWS::EC2::SecurityGroup",
+	      	"Properties": {
+	      		"GroupDescription": "default security group"
+	      	},
+	      	"Metadata": {
+	      		"Title": "DEFAULT SECURITY GROUP",
+	      		"Purpose": "this security group is meant as a containing security group for all provisioned resources"
+	      	}
+	    }
+	    ,
+	    "mysqlIngress": {
+      		"Type": "AWS::EC2::SecurityGroupIngress",
+      		"Properties": {
+        		"GroupId": { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	},
+        		"IpProtocol": "tcp",
+        		"FromPort": "3306",
+        		"ToPort": "3306",
+        		"SourceSecurityGroupId": { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	}
+      		}
+    	}
+    	,
+    	"sshIngress": {
+      		"Type": "AWS::EC2::SecurityGroupIngress",
+      		"Properties": {
+        		"GroupId": { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	},
+        		"IpProtocol": "tcp",
+        		"FromPort": "22",
+        		"ToPort": "22",
+        		"CidrIp": "0.0.0.0/0"
+      		}
+    	}
+    	,
+    	"httpIngress": {
+      		"Type": "AWS::EC2::SecurityGroupIngress",
+      		"Properties": {
+        		"GroupId":  { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	},
+        		"IpProtocol": "tcp",
+        		"FromPort": "80",
+        		"ToPort": "80",
+        		"SourceSecurityGroupId": { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	}
+      		}
+    	}
+    	,
+	    "mysqlEgress": {
+      		"Type": "AWS::EC2::SecurityGroupEgress",
+      		"Properties": {
+        		"GroupId": { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	},
+        		"IpProtocol": "tcp",
+        		"FromPort": "3306",
+        		"ToPort": "3306",
+        		"SourceSecurityGroupId": { 
+    				"Fn::GetAtt" : 
+	        		[ 
+	        			"defaultSecurityGroup", 
+	        			"GroupId" 
+	        		] 
+	        	}
+      		}
+    	}
+  	}
+}
