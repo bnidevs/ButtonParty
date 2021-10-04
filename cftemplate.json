@@ -78,6 +78,7 @@
 		  	"Type" : "AWS::EC2::Subnet",
 		  	"Properties" : {
 		      	"CidrBlock" : "139.103.122.224/28",
+		      	"AvailabilityZone" : "us-east-1a",
 		      	"VpcId" : { "Ref" : "omniVPC" }
 		    }
 		},
@@ -198,12 +199,85 @@
     	"routingAPIGW": {
     		"Type" : "AWS::ApiGatewayV2::Api",
 			"Properties" : {
-		      	"CredentialsArn" : { 
-		      		"Fn::GetAtt" : [ "APIGWRole" , "Arn" ] 
-		      	},
 		      	"Name" : "ButtonPartyAPIGW",
 		      	"ProtocolType" : "HTTP",
 		      	"Target": "https://google.com"
+		    }
+    	},
+    	"addUserRoute": {
+    		"Type" : "AWS::ApiGatewayV2::Route",
+		  	"Properties" : {
+		      	"ApiId" : { "Ref" : "routingAPIGW" },
+		      	"RouteKey" : "GET /add",
+		      	"Target" : {
+	                "Fn::Join": [
+	                    "/",
+	                    [
+	                        "integrations",
+	                        {
+	                            "Ref": "addUserAPIIntegration"
+	                        }
+	                    ]
+	                ]
+	            }
+		    }
+    	},
+    	"addUserAPIIntegration": {
+    		"Type" : "AWS::ApiGatewayV2::Integration",
+		  	"Properties" : {
+		      	"ApiId" : { 
+		      		"Ref" : "routingAPIGW" 
+		      	},
+		      	"CredentialsArn" : { 
+		      		"Fn::GetAtt" : [ "APIGWRole" , "Arn" ] 
+		      	},
+		      	"IntegrationSubtype" : "SQS-SendMessage",
+		      	"IntegrationType" : "AWS_PROXY",
+		      	"PayloadFormatVersion" : "1.0",
+		      	"RequestParameters" : {
+		      		"QueueUrl": {
+			      		"Ref" : "addUserSQS"
+			      	},
+		      		"MessageBody": "$request.querystring.body"
+		      	}
+		    }
+    	},
+    	"pressButtonRoute": {
+    		"Type" : "AWS::ApiGatewayV2::Route",
+		  	"Properties" : {
+		      	"ApiId" : { "Ref" : "routingAPIGW" },
+		      	"RouteKey" : "GET /press",
+		      	"Target" : {
+	                "Fn::Join": [
+	                    "/",
+	                    [
+	                        "integrations",
+	                        {
+	                            "Ref": "pressButtonAPIIntegration"
+	                        }
+	                    ]
+	                ]
+	            }
+		    }
+    	},
+    	"pressButtonAPIIntegration": {
+    		"Type" : "AWS::ApiGatewayV2::Integration",
+		  	"Properties" : {
+		      	"ApiId" : { 
+		      		"Ref" : "routingAPIGW" 
+		      	},
+		      	"CredentialsArn" : { 
+		      		"Fn::GetAtt" : [ "APIGWRole" , "Arn" ] 
+		      	},
+		      	"IntegrationSubtype" : "SQS-SendMessage",
+		      	"IntegrationType" : "AWS_PROXY",
+		      	"PayloadFormatVersion" : "1.0",
+		      	"RequestParameters" : {
+		      		"QueueUrl": {
+			      		"Ref" : "pressButtonSQS"
+			      	},
+		      		"MessageBody": "$request.querystring.body"
+		      	}
 		    }
     	},
     	"APIGWRole": {
