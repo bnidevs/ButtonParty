@@ -12,15 +12,20 @@
 	      	"Type" : "AWS::EC2::Instance",
 		    "Properties" : {
 		        "InstanceType" : "t2.micro",
-		        "SecurityGroups" : [ 
-		        	{ 
-		        		"Ref" : "defaultSecurityGroup" 
-		        	} 
+		        "SecurityGroupIds" : [ 
+		        	{
+		        		"Fn::GetAtt" : 
+		        		[ 
+		        			"defaultSecurityGroup", 
+		        			"GroupId" 
+		        		] 
+	        		}
 		        ],
 		        "KeyName" : { 
 		        	"Ref" : "KeyName" 
 		        },
-		        "ImageId" : "ami-0cfc05f17eac80275"
+		        "ImageId" : "ami-0cfc05f17eac80275",
+		        "SubnetId" : { "Ref" : "omniVPCSubnet" }
 	      	},
 	      	"Metadata": {
 	      		"Title": "OUTGOING TRAFFIC HANDLER",
@@ -34,15 +39,20 @@
 	      	"Type" : "AWS::EC2::Instance",
 		    "Properties" : {
 		        "InstanceType" : "t3.small",
-		        "SecurityGroups" : [ 
-		        	{ 
-		        		"Ref" : "defaultSecurityGroup" 
-		        	} 
+		        "SecurityGroupIds" : [ 
+		        	{
+		        		"Fn::GetAtt" : 
+		        		[ 
+		        			"defaultSecurityGroup", 
+		        			"GroupId" 
+		        		] 
+	        		}
 		        ],
 		        "KeyName" : { 
 		        	"Ref" : "KeyName" 
 		        },
-		        "ImageId" : "ami-0cfc05f17eac80275"
+		        "ImageId" : "ami-0cfc05f17eac80275",
+		        "SubnetId" : { "Ref" : "omniVPCSubnet" }
 	      	},
 	      	"Metadata": {
 	      		"Title": "INCOMING TRAFFIC HANDLER",
@@ -53,17 +63,35 @@
 	      		"Note": "FUTURE UPDATE: THIS SHOULD BE PLACED INTO AN AUTO SCALING GROUP"
 	      	}
 	    },
+	    "omniVPC": {
+		  	"Type" : "AWS::EC2::VPC",
+		  	"Properties" : {
+		  		"CidrBlock" : "139.103.122.224/28",
+		      	"InstanceTenancy" : "default"
+		    },
+		    "Metadata": {
+	      		"Title": "VPC",
+	      		"Purpose": "this vpc contains all provisioned resources and the security group written below"
+	      	}
+		},
+		"omniVPCSubnet": {
+		  	"Type" : "AWS::EC2::Subnet",
+		  	"Properties" : {
+		      	"CidrBlock" : "139.103.122.224/28",
+		      	"VpcId" : { "Ref" : "omniVPC" }
+		    }
+		},
 	    "defaultSecurityGroup": {
 	      	"Type": "AWS::EC2::SecurityGroup",
 	      	"Properties": {
-	      		"GroupDescription": "default security group"
+	      		"GroupDescription": "default security group",
+	      		"VpcId": { "Ref" : "omniVPC" }
 	      	},
 	      	"Metadata": {
 	      		"Title": "DEFAULT SECURITY GROUP",
 	      		"Purpose": "this security group is meant as a containing security group for all provisioned resources"
 	      	}
-	    }
-	    ,
+	    },
 	    "mysqlIngress": {
       		"Type": "AWS::EC2::SecurityGroupIngress",
       		"Properties": {
@@ -85,8 +113,7 @@
 	        		] 
 	        	}
       		}
-    	}
-    	,
+    	},
     	"sshIngress": {
       		"Type": "AWS::EC2::SecurityGroupIngress",
       		"Properties": {
@@ -102,8 +129,7 @@
         		"ToPort": "22",
         		"CidrIp": "0.0.0.0/0"
       		}
-    	}
-    	,
+    	},
     	"httpIngress": {
       		"Type": "AWS::EC2::SecurityGroupIngress",
       		"Properties": {
@@ -125,8 +151,7 @@
 	        		] 
 	        	}
       		}
-    	}
-    	,
+    	},
 	    "mysqlEgress": {
       		"Type": "AWS::EC2::SecurityGroupEgress",
       		"Properties": {
@@ -148,6 +173,84 @@
 	        		] 
 	        	}
       		}
-    	}
+    	},
+    	"timestampSQS": {
+    		"Type" : "AWS::SQS::Queue",
+		  	"Properties" : {
+		      	"DelaySeconds" : 0,
+		      	"KmsMasterKeyId" : "alias/aws/sqs"
+		    }
+    	},
+    	"addUserSQS": {
+			"Type" : "AWS::SQS::Queue",
+		  	"Properties" : {
+		      	"DelaySeconds" : 0,
+		      	"KmsMasterKeyId" : "alias/aws/sqs"
+		    }
+    	},
+    	"pressButtonSQS": {
+    		"Type" : "AWS::SQS::Queue",
+		  	"Properties" : {
+		      	"DelaySeconds" : 0,
+		      	"KmsMasterKeyId" : "alias/aws/sqs"
+		    }
+    	},
+    	"routingAPIGW": {
+    		"Type" : "AWS::ApiGatewayV2::Api",
+			"Properties" : {
+		      	"CredentialsArn" : { 
+		      		"Fn::GetAtt" : [ "APIGWRole" , "Arn" ] 
+		      	},
+		      	"Name" : "ButtonPartyAPIGW",
+		      	"ProtocolType" : "HTTP",
+		      	"Target": "https://google.com"
+		    }
+    	},
+    	"APIGWRole": {
+		  	"Type" : "AWS::IAM::Role",
+		  	"Properties" : {
+		  		"AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "apigateway.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+		      	"Policies" : [
+		      		{
+		      			"PolicyName": "buttonpartyAPIGW-role",
+                        "PolicyDocument": {
+				      		"Version": "2012-10-17",
+		                    "Statement": [
+		                        {
+		                        	"Sid": "allowGwSendMsg",
+		                            "Effect": "Allow",
+		                            "Action": [
+		                                "sqs:SendMessage"
+		                            ],
+		                            "Resource": [
+		                            	{ 
+								      		"Fn::GetAtt" : [ "pressButtonSQS" , "Arn" ] 
+								      	},
+		                				{ 
+								      		"Fn::GetAtt" : [ "addUserSQS" , "Arn" ] 
+								      	}
+		                            ]
+		                        }
+		                    ]
+		                }
+			      	}
+		      	]
+		    }
+		}
   	}
 }
