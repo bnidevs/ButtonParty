@@ -7,19 +7,31 @@ from boto3 import client
 BUTTON_FREQUENCY = 10000
 
 # URL of the SQS queue ButtonParty-Incoming
-QUEUE_URL = 'INSERT SQS_QUEUE URL'
+SQS_INCOMING_QUEUE_URL = 'INSERT SQS_QUEUE URL'
+
+# URL of the SQS queue ButtonParty-Scoring
+SQS_SCORING_QUEUE_URL = 'arn:aws:sqs:us-east-1:291201070981:ButtonParty-Scoring'
 
 # AWS Region
 REGION = 'us-east-1'
+
+# RDS DATABASE name
+DATABASE_NAME = 'users'
+
+# RDS_RESOURCE_ARN
+RDS_RESOURCE_ARN = 'arn:aws:rds:us-east-1:291201070981:cluster:buttonparty-serverless'
+
+# RDS SECRET ARN
+RDS_SECRET_ARN = 'arn:aws:secretsmanager:us-east-1:291201070981:secret:ButtonPartyDBSecret-m9GzwZ'
+
+# SNS ARN
+SNS_ARN = 'INSERT SNS ARN'
 
 # RDS Client
 RDS_CLIENT = client('rds-data', region_name=REGION)
 
 # SQS Client
 SQS_CLIENT = client('sqs', region_name=REGION)
-
-# SNS ARN
-SNS_ARN = 'INSERT SNS ARN'
 
 # SNS CLIENT
 SNS_CLIENT = client('sns', region_name=REGION)
