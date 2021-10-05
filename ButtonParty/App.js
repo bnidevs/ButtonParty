@@ -4,10 +4,11 @@ import { TouchableHighlight, StyleSheet, View, Text, Button } from 'react-native
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function App() {
-
+  //Setting up hook variables for streak and points
   let [streak, setStreak] = useState('0');
   let [points, setPoints] = useState(0);
 
+  //Sets the streak key in local storage to current streak value after button press
   const set = async (val) => {
     try {
       await AsyncStorage.setItem('streak', val);
@@ -16,6 +17,8 @@ export default function App() {
     }
   }
 
+  //Fetches the current streak value
+  //Sets variable "streak" to stored val
   const getStreak = async () => {
     try {
       const val = await AsyncStorage.getItem('streak');
@@ -27,6 +30,8 @@ export default function App() {
     }
   }
 
+  //Clears the stored data, added this for testing 
+  //also could be used if user deletes account
   const clear = async () => {
     try {
       await AsyncStorage.clear();
@@ -36,6 +41,7 @@ export default function App() {
     }
   }
 
+  //Called when button is pressed, handles points increment
   function onPress() {
     getStreak();
     let temp_streak = parseInt(streak) + 1;
@@ -60,14 +66,15 @@ export default function App() {
     );
   }
 
-
+  //Get the streak value before return so it prints the correct streak
   getStreak();
   return (
     <View style = {styles.container}>
       <AppButton onPress={onPress} title="Button Party"/>
       <Text style={styles.bottomText}>Points: {points}</Text>
       <Text style={styles.bottomText}>Streak: {streak}</Text>
-      <Button onPress={clear} title="Clear"/>
+      <Button style={styles.buttomButton} onPress={clear} title="Clear"/>
+      <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
     </View>
 );
 }
@@ -103,7 +110,4 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     textTransform: "uppercase"
   },
-  clear: {
-    
-  }
 });
