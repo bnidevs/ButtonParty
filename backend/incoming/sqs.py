@@ -24,7 +24,7 @@ def receive_messages_from_SQS( QUEUE_URL ):
         MessageAttributeNames=[
             'All'
         ],
-        VisibilityTimeout=10,
+        VisibilityTimeout=1,
         WaitTimeSeconds= 3
     )
 
