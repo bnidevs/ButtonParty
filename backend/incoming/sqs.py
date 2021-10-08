@@ -13,6 +13,17 @@ def delete_messages_from_SQS( receipt_handle, QUEUE_URL ):
         Entries=receipt_handle
     )
 
+def purge_queue_from_SQS ( QUEUE_URL ):
+    SQS_CLIENT.purge_queue(
+        QueueUrl=QUEUE_URL
+    )
+
+def send_message_to_SQS( message, QUEUE_URL ):
+    SQS_CLIENT.send_message(
+        QueueUrl=QUEUE_URL,
+        MessageBody=message
+    )
+
 def receive_messages_from_SQS( QUEUE_URL ):
     # Receive message from SQS queue
     response = SQS_CLIENT.receive_message(
