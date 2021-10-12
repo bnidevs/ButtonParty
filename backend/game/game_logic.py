@@ -7,7 +7,7 @@ import time
 import json
 
 from constants import BUTTON_FREQUENCY, TIME_TO_PRESS, SQS_SCORING_QUEUE_URL, SQS_TIMESTAMP_QUEUE_URL
-from rds import get_user_from_RDS, update_user_in_RDS
+from rds import get_user_from_RDS, update_user_in_RDS, set_late_users_streak_to_zero, set_pressed_to_false_for_all
 from sqs import receive_messages_from_SQS, delete_messages_from_SQS, purge_queue_from_SQS, send_message_to_SQS, add_new_users
 from sns import send_message_to_SNS
 from helper import validateJson
@@ -16,6 +16,10 @@ timestamp_button_limit = None
 
 def call_events():
     print('Button Activated')
+    # Extra Catch to make sure the streaks are set to 0
+    set_late_users_streak_to_zero()
+    # Set Pressed for all users
+    set_pressed_to_false_for_all()
     # Clear out the SQS TIMESTAMP QUEUE
     purge_queue_from_SQS( SQS_TIMESTAMP_QUEUE_URL )
     # Send out a message to the SQS TIMESTAMP DATABASE
@@ -38,6 +42,8 @@ def reset_timestamp():
     time_passed = ( now - timestamp_button_limit ) / 1000
     if(time_passed >= TIME_TO_PRESS):
         timestamp_button_limit = None
+        set_late_users_streak_to_zero()
+
 
 def get_timestamp():
     global timestamp_button_limit
@@ -56,7 +62,7 @@ def is_valid_timestamp( timestamp_from_request ):
         return True
     return False
 
-def increment_score(username, streak, player_timestamp):
+def increment_score(username, player_timestamp):
     try:
         user = get_user_from_RDS( username )
     except Exception as err:
@@ -64,33 +70,23 @@ def increment_score(username, streak, player_timestamp):
         return
 
     if( not is_valid_timestamp( player_timestamp )):
-        print('Button pressed after acceptable time limit')
+        print('TIME LIMIT EXCEEDED')
         return
 
-    # If the streak, is zero, no points are added No need to check for cheating
-    if( streak == 0):
-        try:
-            update_user_in_RDS( username=user['username'], score=user['score'], streak=0 )
-        except Exception as err:
-            print('Unable to update RDS', err)
+    if( user['pressed'] ):
+        print(f"USER {user['username']} already pressed button")
         return
 
-    # Make sure the streak is only 1 more than what is stored in the DB
-    if ( user['streak'] + 1 == streak ):
-        if(streak <= 10):
-            new_score = user['score'] + streak
-        else:
-            new_score =  user['score'] + (streak * streak)
-
-        try:
-            update_user_in_RDS( username=user['username'], score=new_score, streak=streak )
-        except Exception as err:
-            print('Unable to update RDS', err)
-
-    # Something had gone wrong, likely frontent manipulation
+    streak = user['streak'] + 1
+    if(streak <= 10):
+        new_score = user['score'] + streak
     else:
-        expected = user['streak']
-        print(f'Streak not what expected: expected:{ expected } got:{streak}')
+        new_score =  user['score'] + (streak * streak)
+
+    try:
+        update_user_in_RDS( username=user['username'], score=new_score, streak=streak )
+    except Exception as err:
+        print('Unable to update RDS', err)
 
 def remove_duplicates(messages):
     if(not messages):
@@ -116,12 +112,8 @@ def check_the_pressed_buttons():
             'ReceiptHandle': message['ReceiptHandle']
         })
         player_timestamp = int(message['Attributes']['SentTimestamp'])
-        try:
-            body = json.loads(message['Body'])
-        except Exception as err:
-            body = None
-        if(validateJson(body)):
-            increment_score( body['username'], body['streak'], player_timestamp);
+        username = message['Body']
+        increment_score( username, player_timestamp );
     delete_messages_from_SQS( receiptHandles, SQS_SCORING_QUEUE_URL )
     return True
 
