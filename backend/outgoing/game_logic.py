@@ -9,13 +9,12 @@ import json
 from constants import BUTTON_FREQUENCY, TIME_TO_PRESS, SQS_SCORING_QUEUE_URL, SQS_TIMESTAMP_QUEUE_URL
 from rds import get_user_from_RDS, update_user_in_RDS
 from sqs import receive_messages_from_SQS, delete_messages_from_SQS, purge_queue_from_SQS, send_message_to_SQS
+from sns import send_message_to_SNS
 from helper import validateJson
 
 timestamp_button_limit = None
 
 def call_events():
-    global timestamp_button_limit
-    timestamp_button_limit = None
     print('Button Activated')
     # Clear out the SQS TIMESTAMP QUEUE
     purge_queue_from_SQS( SQS_TIMESTAMP_QUEUE_URL )
@@ -30,11 +29,19 @@ def run_button_game():
         if( random.random() < 1 / BUTTON_FREQUENCY ):
             call_events()
 
+def reset_timestamp():
+    global timestamp_button_limit
+    if(timestamp_button_limit == None):
+        return
+    now = time.time() * 1000
+    time_passed = ( now - timestamp_button_limit ) / 1000
+    if(time_passed >= TIME_TO_PRESS):
+        timestamp_button_limit = None
+
 def get_timestamp():
     global timestamp_button_limit
     if(timestamp_button_limit == None):
         try:
-            print('here')
             message = receive_messages_from_SQS( SQS_TIMESTAMP_QUEUE_URL )[0]
             timestamp_button_limit = int(message['Attributes']['SentTimestamp'])
         except Exception as err:
@@ -97,6 +104,7 @@ def remove_duplicates(messages):
     return r
 
 def check_the_pressed_buttons():
+    reset_timestamp()
     messages = remove_duplicates(receive_messages_from_SQS( SQS_SCORING_QUEUE_URL ))
     if(len(messages) == 0):
         return False
