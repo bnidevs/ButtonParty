@@ -137,7 +137,7 @@
 		        		] 
 	        		}
 		        ],
-              	"DeletionProtection": true,
+              	"DeletionProtection": false,
               	"EnableHttpEndpoint": true,
               	"KmsKeyId" : "alias/aws/rds",
               	"StorageEncrypted" : true,
