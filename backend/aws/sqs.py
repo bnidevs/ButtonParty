@@ -77,9 +77,3 @@ def add_new_users():
         print('Error deleting message', err)
 
     return True
-
-
-if __name__ == '__main__':
-
-    while(True):
-        add_new_users()
