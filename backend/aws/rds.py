@@ -44,7 +44,10 @@ def get_user_from_RDS(username):
         resourceArn = RDS_RESOURCE_ARN,
         secretArn = RDS_SECRET_ARN,
         database = DATABASE_NAME,
-        sql = f'SELECT * FROM ButtonParty WHERE username=\'{username}\';'
+        sql = f'SELECT * FROM ButtonParty WHERE username=:input_username;',
+        parameters = [
+            {'name': 'input_username', 'value': {'stringValue': str(username)}}
+            ]
         )['records'][0]
     return {
         'username': response[0]['stringValue'],
@@ -59,5 +62,10 @@ def update_user_in_RDS(username, score, streak):
         resourceArn = RDS_RESOURCE_ARN,
         secretArn = RDS_SECRET_ARN,
         database = DATABASE_NAME,
-        sql = f'UPDATE ButtonParty SET score={score}, streak={streak}, pressed = True WHERE username=\'{username}\';'
+        sql = f'UPDATE ButtonParty SET score=:new_score, streak=:new_streak, pressed = True WHERE username=:input_username;',
+        parameters = [
+            {'name': 'input_username', 'value': {'stringValue': str(username)}},
+            {'name': 'new_score', 'value': {'longValue': score}},
+            {'name': 'new_streak', 'value': {'longValue': streak}}
+            ]
         )
