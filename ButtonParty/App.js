@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { TouchableHighlight, StyleSheet, View, Text, Button } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import messaging from '@react-native-firebase/messaging';
 
 export default function App() {
   //Setting up hook variables for streak and points
