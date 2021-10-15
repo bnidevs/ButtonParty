@@ -16,8 +16,8 @@ def lambda_handler(event, context):
         try:
             response = RDS_CLIENT.execute_statement(
                 continueAfterTimeout = True,
-                resourceArn = '***REMOVED***',
-                secretArn = '***REMOVED***',
+                resourceArn = 'INSERT DB CLUSTER ARN HERE',
+                secretArn = 'INSERT SECRET ARN HERE',
                 database = 'users',
                 sql = 'SELECT * FROM ButtonParty WHERE username=:username;',
                 parameters = [
@@ -40,8 +40,8 @@ def lambda_handler(event, context):
         try:
             response = RDS_CLIENT.execute_statement(
                 continueAfterTimeout = True,
-                resourceArn = '***REMOVED***',
-                secretArn = '***REMOVED***',
+                resourceArn = 'INSERT DB CLUSTER ARN HERE',
+                secretArn = 'INSERT SECRET ARN HERE',
                 database = 'users',
                 sql = 'SELECT username, score FROM ButtonParty ORDER BY score DESC LIMIT 10'
             )['records']
