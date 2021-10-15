@@ -13,15 +13,13 @@ def lambda_handler(event, context):
         
         username = event['rawQueryString'].split('=')[-1]
         
-        print(username)
-        
         try:
             response = RDS_CLIENT.execute_statement(
                 continueAfterTimeout = True,
-                resourceArn = 'INSERT DB CLUSTER ARN HERE',
-                secretArn = 'INSERT SECRET ARN HERE',
+                resourceArn = '***REMOVED***',
+                secretArn = '***REMOVED***',
                 database = 'users',
-                sql = f'SELECT * FROM ButtonParty WHERE username=:username;',
+                sql = 'SELECT * FROM ButtonParty WHERE username=:username;',
                 parameters = [
                     {'name': 'username', 'value': {'stringValue': str(username)}},
                 ]
@@ -36,8 +34,26 @@ def lambda_handler(event, context):
             response = {
                 'error': str(e)
             }
+        
+    elif fetch_type == 'lb':
+        
+        try:
+            response = RDS_CLIENT.execute_statement(
+                continueAfterTimeout = True,
+                resourceArn = '***REMOVED***',
+                secretArn = '***REMOVED***',
+                database = 'users',
+                sql = 'SELECT username, score FROM ButtonParty ORDER BY score DESC LIMIT 10'
+            )['records']
             
-        print(response)
+            response = [{
+                'username': response[i][0]['stringValue'],
+                'score': response[i][1]['longValue']
+            } for i in range(len(response))]
+        except Exception as e:
+            response = {
+                'error': str(e)
+            }
     
     return {
         'statusCode': 200,
