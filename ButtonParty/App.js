@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { TouchableHighlight, StyleSheet, View, Text, Button } from 'react-native'
+import React, { useState, useEffect } from 'react';
+import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
 
@@ -9,6 +9,14 @@ export default function App() {
   let [streak, setStreak] = useState(0);
   let [points, setPoints] = useState(0);
   let username = "bdngeorge";
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+    });
+
+    return unsubscribe;
+  }, []);
 
   // //Sets the streak key in local storage to current streak value after button press
   // const set = async (val) => {
@@ -76,14 +84,21 @@ export default function App() {
   }
 
   return (
-    <View style = {styles.container}>
-      <Text style={styles.topText}>
-        <Text style={styles.points}>Points: {points}</Text>
-        <Text style={styles.streak}>Streak: {streak}</Text>
-      </Text>
-      <AppButton onPress={onPress} title="Button Party"/>
-      <Button style={styles.buttomButton} onPress={clear} title="Clear"/>
-      <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
+    <View style={styles.container}>
+      <View style={styles.topText}>
+        <Text style={styles.Title}>BUTTON PARTY</Text>
+        <Text style={styles.Scores}>
+          <Text style={styles.points}>Points: {points}                                                </Text>
+          <Text style={styles.streak}>Streak: {streak}</Text>
+        </Text>
+      </View>
+      <View style={styles.button}>
+        <AppButton onPress={onPress} title=""/>
+      </View>
+      <View style={styles.tempButtons}>
+        <Button style={styles.buttomButton} onPress={clear} title="Clear"/>
+        <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
+      </View>
     </View>
 );
 }
@@ -91,9 +106,30 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#c2c2c2',
     alignItems: 'center',
-    justifyContent:'space-evenly'
+    backgroundColor: '#c2c2c2',
+    justifyContent: 'space-between'
+  },
+  topText: {
+    flex: .15,
+    alignItems: 'center',
+    textTransform: 'uppercase',
+  },
+  Title: {
+    fontSize: 30,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  Scores: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000',
+  },
+  button: {
+    flex: .55,
+  },
+  tempButtons: {
+    flex: .3,
   },
   appButtonContainer: {
     backgroundColor: '#ff0000',
@@ -102,7 +138,7 @@ const styles = StyleSheet.create({
     borderRadius: 390,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 8,
+    elevation: 10,
   },
   appButtonText: {
     fontSize: 30,
@@ -110,14 +146,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignSelf: 'center',
     textTransform: 'uppercase'
-  },
-  topText: {
-    paddingTop: 50,
-    fontSize: 18,
-    color: '#000',
-    flexDirection: 'row',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    justifyContent:'space-between'
   },
 });
