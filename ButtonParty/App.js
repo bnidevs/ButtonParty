@@ -37,7 +37,8 @@ export default function App() {
   const clear = async () => {
     try {
       await AsyncStorage.clear();
-      setStreak('0');
+      setStreak(0);
+      setPoints(0);
     } catch(e) {
       console.log("Could not clear");
     }
