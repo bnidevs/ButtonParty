@@ -11,6 +11,8 @@ export default function App() {
   let username = "bdngeorge";
 
   useEffect(() => {
+    console.log(messaging().getToken());
+
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
@@ -18,27 +20,7 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // //Sets the streak key in local storage to current streak value after button press
-  // const set = async (val) => {
-  //   try {
-  //     await AsyncStorage.setItem('streak', val);
-  //   } catch (e) {
-  //     console.log("Unable to save data");
-  //   }
-  // }
 
-  // //Fetches the current streak value
-  // //Sets variable "streak" to stored val
-  // const getStreak = async () => {
-  //   try {
-  //     const val = await AsyncStorage.getItem('streak');
-  //     if(val != null) {
-  //       setStreak(val);
-  //     } 
-  //   } catch (e) {
-  //     console.log("Unable to read streak data");
-  //   }
-  // }
 
   //Clears the stored data, added this for testing 
   //also could be used if user deletes account
@@ -54,6 +36,7 @@ export default function App() {
 
   //Called when button is pressed, handles points increment
   const onPress = async () => {
+    messaging().getToken().then(rtrn => console.log(rtrn));
     var obj;
     try {
       await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press?body=' + username);
