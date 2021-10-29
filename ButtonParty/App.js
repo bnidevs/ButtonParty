@@ -4,38 +4,34 @@ import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Al
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
 
+
 export default function App() {
   //Setting up hook variables for streak and points
   let [streak, setStreak] = useState(0);
   let [points, setPoints] = useState(0);
+  let [active, setActive] = useState(false);
   let username = "bdngeorge";
 
   useEffect(() => {
-    console.log(messaging().getToken());
-
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const foreground = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      setActive(true);
     });
 
-    return unsubscribe;
+    return foreground;
   }, []);
+  useEffect(() => {
+    const background = messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Message handled in the background!', remoteMessage);
+      setActive(true);
+    });
 
-
-
-  //Clears the stored data, added this for testing 
-  //also could be used if user deletes account
-  const clear = async () => {
-    try {
-      await AsyncStorage.clear();
-      setStreak(0);
-      setPoints(0);
-    } catch(e) {
-      console.log("Could not clear");
-    }
-  }
+    return background;
+  }, []);
 
   //Called when button is pressed, handles points increment
   const onPress = async () => {
+    setActive(false);
     messaging().getToken().then(rtrn => console.log(rtrn));
     var obj;
     try {
@@ -56,12 +52,13 @@ export default function App() {
   const AppButton = ({ onPress, title }) => {
     return (
       <TouchableHighlight 
+        disabled = {!active}
         activeOpacity={.8}
         underlayColor="#db0000"
         onPress={onPress}
-        style={styles.appButtonContainer}
+        style={active ? styles.enabled : styles.disabled}
       >
-        <Text style={styles.appButtonText}>{title}</Text>
+        <Text style={styles.appButtonText}>{active ? title : "Disabled"}</Text>
       </TouchableHighlight>
     );
   }
@@ -76,12 +73,14 @@ export default function App() {
         </Text>
       </View>
       <View style={styles.button}>
-        <AppButton onPress={onPress} title=""/>
+        <AppButton onPress={onPress} title="Press"/>
       </View>
       <View style={styles.tempButtons}>
-        <Button style={styles.buttomButton} onPress={clear} title="Clear"/>
+        <Button style={styles.buttomButton} onPress={() => setStreak(0)} title="Clear"/>
         <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
+        <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
       </View>
+      <Text>Active: {active ? "true" : "false"}</Text>
     </View>
 );
 }
@@ -114,8 +113,25 @@ const styles = StyleSheet.create({
   tempButtons: {
     flex: .3,
   },
-  appButtonContainer: {
+  enabled: {
     backgroundColor: '#ff0000',
+    width: 350,
+    height: 350,
+    borderRadius: 390,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 10,
+  },
+  disabled: {
+    backgroundColor: '#db0000',
+    width: 350,
+    height: 350,
+    borderRadius: 390,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 10,
+  },
+  appButtonContainer: {
     width: 350,
     height: 350,
     borderRadius: 390,
