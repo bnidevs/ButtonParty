@@ -17,4 +17,4 @@
 See [`cftemplate.json`](https://github.com/bnidevs/ButtonParty/blob/main/cftemplate.json) (CloudFormation template) for more configuration details
 
 ### Flow Diagram
-<img href="https://github.com/bnidevs/ButtonParty/blob/documentation/backend-flowchart.png">
+![](https://github.com/bnidevs/ButtonParty/blob/documentation/docs/backend-flowchart.png?raw=true)
