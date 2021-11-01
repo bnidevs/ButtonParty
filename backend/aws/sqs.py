@@ -5,6 +5,7 @@ sys.path.append(os.path.abspath('../'))
 
 from constants import SQS_INCOMING_QUEUE_URL, REGION, SQS_CLIENT
 from rds import add_user_to_RDS
+from sns import add_platform_app_endpoint, subscribe_endpoint_to_topic
 
 def delete_messages_from_SQS( receipt_handle, QUEUE_URL ):
     # Delete received message from queue
@@ -53,7 +54,10 @@ def add_new_users():
     receiptHandles = []
     receiptHandlesSet = set()
     for message in messages:
-        username = message['Body']
+        body = json.loads(message['Body'])
+        username = body['username']
+        token = body['token']
+
         id = message['MessageId']
         receiptHandle = message['ReceiptHandle']
 
@@ -67,6 +71,7 @@ def add_new_users():
         })
         try:
             add_user_to_RDS(username)
+            subscribe_endpoint_to_topic( add_platform_app_endpoint(token) )
         except Exception as err:
             print(f'Unable to add user: {username}\n', err)
 

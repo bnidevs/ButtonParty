@@ -23,7 +23,3 @@ def subscribe_endpoint_to_topic( endpoint ):
         Protocol='application',
         Endpoint=endpoint
     )
-
-arn = add_platform_app_endpoint( 'SECONDTEST' )
-r = subscribe_endpoint_to_topic(arn)
-print(r)

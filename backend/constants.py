@@ -33,8 +33,11 @@ RDS_RESOURCE_ARN = 'REPLACE'
 # RDS SECRET ARN
 RDS_SECRET_ARN = 'REPLACE'
 
-# SNS ARN
-SNS_ARN = 'REPLACE'
+# SNS Platform Application
+SNS_PlATFORM_ARN = 'REPLACE'
+
+# SNS Topic Arn
+SNS_TOPIC_ARN = 'REPLACE'
 
 # RDS Client
 RDS_CLIENT = client('rds-data', region_name=REGION)
