@@ -4,7 +4,6 @@ import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Al
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
 
-
 export default function App() {
   //Setting up hook variables for streak and points
   let [streak, setStreak] = useState(0);
@@ -14,7 +13,7 @@ export default function App() {
 
   useEffect(() => {
     const foreground = messaging().onMessage(async remoteMessage => {
-      console.log('A new FCM message arrived!', JSON.stringify(remoteMessage));
+      console.log('A new FCM message arrived!', JSON.stringify(remoteMessage['data']['message']));
       setActive(true);
     });
 
@@ -22,7 +21,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     const background = messaging().setBackgroundMessageHandler(async remoteMessage => {
-      console.log('Message handled in the background!', remoteMessage);
+      console.log('Message handled in the background!', JSON.stringify(remoteMessage['data']['message']));
       setActive(true);
     });
 
