@@ -7,6 +7,18 @@ import random
 from constants import RDS_CLIENT, RDS_RESOURCE_ARN, RDS_SECRET_ARN, DATABASE_NAME
 from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL, ADD_USER_TO_RDS_SQL
 
+def rds_update_freezer_table(username, sqlStatement):
+    return RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = sqlStatement,
+        parameters = [
+            {'name': 'input_username', 'value': {'stringValue': str(username)}}
+            ]
+        )
+
 def set_late_users_streak_to_zero():
     return RDS_CLIENT.execute_statement(
         continueAfterTimeout = True,
@@ -70,3 +82,6 @@ def update_user_in_RDS(username, score, streak):
             {'name': 'new_streak', 'value': {'longValue': streak}}
             ]
         )
+
+
+set_late_users_streak_to_zero()
