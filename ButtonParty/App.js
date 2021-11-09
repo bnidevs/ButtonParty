@@ -42,6 +42,7 @@ export default function App() {
     const foreground = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage['data']['message']));
       setActive(true);
+      setTimeout(() => { setActive(false); }, 60000);
     });
 
     return foreground;
@@ -51,6 +52,7 @@ export default function App() {
       console.log('Message handled in the background!', JSON.stringify(remoteMessage['data']['message']));
       onMessageReceived(remoteMessage);
       setActive(true);
+      setTimeout(() => { setActive(false); }, 60000);
     });
 
     return background;
@@ -83,7 +85,7 @@ export default function App() {
         activeOpacity={.8}
         underlayColor="#db0000"
         onPress={onPress}
-        style={active ? styles.enabled : styles.disabled}
+        style={[styles.button, active ? styles.enabled : styles.disabled]}
       >
         <Text style={styles.appButtonText}>{active ? title : "Disabled"}</Text>
       </TouchableHighlight>
@@ -141,31 +143,19 @@ const styles = StyleSheet.create({
   tempButtons: {
     flex: .3,
   },
-  enabled: {
-    backgroundColor: '#ff0000',
+  button: {
     width: 350,
     height: 350,
     borderRadius: 390,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 10,
+  },
+  enabled: {
+    backgroundColor: '#ff0000',
   },
   disabled: {
     backgroundColor: '#db0000',
-    width: 350,
-    height: 350,
-    borderRadius: 390,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 10,
-  },
-  appButtonContainer: {
-    width: 350,
-    height: 350,
-    borderRadius: 390,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 10,
   },
   appButtonText: {
     fontSize: 30,
