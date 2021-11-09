@@ -64,7 +64,7 @@ The API Gateway is set up with 3 routes:
      - This route redirects requests into the same lambda function mentioned above.
 
 #### RDS
-The RDS consists of a serverless Aurora cluster with 
+The RDS consists of a serverless Aurora cluster with a minimum allocation of 1 compute unit and a maximum allocation of 2 compute units (subject to production conditions).
 
 **Schemas**
 
@@ -75,3 +75,4 @@ The RDS consists of a serverless Aurora cluster with
 | robocop  | 12890 | 4      | false   |
 | loki     | 5     | 0      | false   |
 | dumbledore | 320 | 8      | false   |
+
