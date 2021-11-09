@@ -5,7 +5,7 @@ import json
 import random
 
 from constants import RDS_CLIENT, RDS_RESOURCE_ARN, RDS_SECRET_ARN, DATABASE_NAME
-from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL, ADD_USER_TO_RDS_SQL
+from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL
 
 def rds_update_freezer_table(username, sqlStatement):
     return RDS_CLIENT.execute_statement(
@@ -38,18 +38,28 @@ def set_pressed_to_false_for_all():
     )
 
 def add_user_to_RDS(username=random.randint(1000000,9999999)):
-    return RDS_CLIENT.execute_statement(
+    RDS_CLIENT.execute_statement(
         continueAfterTimeout = True,
         resourceArn = RDS_RESOURCE_ARN,
         secretArn = RDS_SECRET_ARN,
         database = DATABASE_NAME,
-        sql = ADD_USER_TO_RDS_SQL,
+        sql = 'INSERT INTO ButtonParty (username, score, streak) VALUES (:new_username, :new_score, :new_streak)',
         parameters = [
             {'name': 'new_username', 'value': {'stringValue': str(username)}},
             {'name': 'new_score', 'value': {'longValue': 0}},
             {'name': 'new_streak', 'value': {'longValue': 0}}
             ]
-        )
+    )
+    RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = 'INSERT INTO FreezePowerUp VALUES(:new_username, NULL)',
+        parameters = [
+            {'name': 'new_username', 'value': {'stringValue': str(username)}}
+            ]
+    )
 
 def get_user_from_RDS(username):
     response = RDS_CLIENT.execute_statement(
@@ -82,6 +92,3 @@ def update_user_in_RDS(username, score, streak):
             {'name': 'new_streak', 'value': {'longValue': streak}}
             ]
         )
-
-
-set_late_users_streak_to_zero()

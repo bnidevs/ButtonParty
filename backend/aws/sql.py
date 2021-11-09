@@ -15,8 +15,3 @@ WHERE
                                 and NOW() <= FreezePowerUp.activeUntil )
 ;
 '''
-
-ADD_USER_TO_RDS_SQL = '''
-INSERT INTO ButtonParty (username, score, streak) VALUES (:new_username, :new_score, :new_streak);
-INSERT INTO FreezePowerUp VALUES(:new_username, 0, 0, 0, 0, NULL);
-'''

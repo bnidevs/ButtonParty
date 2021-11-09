@@ -46,6 +46,3 @@ def activate_Freeze( username, duration ):
 
     # Remove the points
     update_user_in_RDS(username, score-priceOfFreeze[duration], streak)
-
-# print(ACTIVATE_FREEZE_SQL.replace('REPLACE', timeOfFreeze[6]))
-activate_Freeze('apinkow27', 6)

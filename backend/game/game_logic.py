@@ -2,6 +2,7 @@ import sys
 import os
 sys.path.append(os.path.abspath('../'))
 sys.path.append(os.path.abspath('../aws'))
+sys.path.append(os.path.abspath('./powerups'))
 import random
 import time
 import json
@@ -9,6 +10,7 @@ import json
 from constants import BUTTON_FREQUENCY, TIME_TO_PRESS, SQS_SCORING_QUEUE_URL, SQS_TIMESTAMP_QUEUE_URL
 from rds import get_user_from_RDS, update_user_in_RDS, set_late_users_streak_to_zero, set_pressed_to_false_for_all
 from sqs import receive_messages_from_SQS, delete_messages_from_SQS, purge_queue_from_SQS, send_message_to_SQS, add_new_users
+from powerups import check_for_powerup_purchases
 from sns import send_message_to_SNS
 from helper import validateJson
 
@@ -118,17 +120,19 @@ def check_the_pressed_buttons():
     return True
 
 if __name__ == '__main__':
-    print("1 - Checking for new Users")
-    print("2 - Run check for pressed button")
+    print("1 - Check for all 3 SQS requests (users, presses, powerups)")
+    print("2 - Run check for pressed button and purchases")
     print("3 - Run the random button press")
     print("4 - Force Button press")
     num = int(input("Input 1-4: "))
     if( num == 1 ):
         while(True):
             add_new_users()
+            check_the_pressed_buttons()
+            check_for_powerup_purchases()
     elif( num == 2 ):
         while(True):
-            check_the_pressed_buttons()
+            check_for_powerup_purchases()
     elif( num == 3 ):
         while(True):
             run_button_game();
