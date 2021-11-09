@@ -5,6 +5,19 @@ import json
 import random
 
 from constants import RDS_CLIENT, RDS_RESOURCE_ARN, RDS_SECRET_ARN, DATABASE_NAME
+from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL
+
+def rds_update_freezer_table(username, sqlStatement):
+    return RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = sqlStatement,
+        parameters = [
+            {'name': 'input_username', 'value': {'stringValue': str(username)}}
+            ]
+        )
 
 def set_late_users_streak_to_zero():
     return RDS_CLIENT.execute_statement(
@@ -12,7 +25,7 @@ def set_late_users_streak_to_zero():
         resourceArn = RDS_RESOURCE_ARN,
         secretArn = RDS_SECRET_ARN,
         database = DATABASE_NAME,
-        sql = f'Update ButtonParty SET streak = 0 WHERE pressed = False;'
+        sql = SET_LATE_USERS_STREAK_TO_ZERO_SQL
     )
 
 def set_pressed_to_false_for_all():
@@ -25,7 +38,7 @@ def set_pressed_to_false_for_all():
     )
 
 def add_user_to_RDS(username=random.randint(1000000,9999999)):
-    return RDS_CLIENT.execute_statement(
+    RDS_CLIENT.execute_statement(
         continueAfterTimeout = True,
         resourceArn = RDS_RESOURCE_ARN,
         secretArn = RDS_SECRET_ARN,
@@ -36,7 +49,17 @@ def add_user_to_RDS(username=random.randint(1000000,9999999)):
             {'name': 'new_score', 'value': {'longValue': 0}},
             {'name': 'new_streak', 'value': {'longValue': 0}}
             ]
-        )
+    )
+    RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = 'INSERT INTO FreezePowerUp VALUES(:new_username, NULL)',
+        parameters = [
+            {'name': 'new_username', 'value': {'stringValue': str(username)}}
+            ]
+    )
 
 def get_user_from_RDS(username):
     response = RDS_CLIENT.execute_statement(

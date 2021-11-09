@@ -21,6 +21,9 @@ SQS_SCORING_QUEUE_URL = 'REPLACE'
 # URL of the SQS ButtonParty-check_timestamp
 SQS_TIMESTAMP_QUEUE_URL = 'REPLACE'
 
+# URL of the SQS ButtonParty-Powerups
+SQS_POWERUPS_QUEUE_URL = 'REPLACE'
+
 # AWS Region
 REGION = 'us-east-1'
 
