@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "582017907775",
+    "project_id": "buttonparty-1fbd9",
+    "storage_bucket": "buttonparty-1fbd9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582017907775:android:08e7e23eaf8c79ff098c8a",
+        "android_client_info": {
+          "package_name": "com.buttonparty"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFMcQgP1y938l477R543EVGYli8R2Ur2U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
