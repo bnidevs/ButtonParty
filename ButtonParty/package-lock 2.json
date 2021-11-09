@@ -8,6 +8,7 @@
       "name": "ButtonParty",
       "version": "0.0.1",
       "dependencies": {
+        "@notifee/react-native": "^3.0.4",
         "@react-native-async-storage/async-storage": "^1.15.9",
         "@react-native-firebase/app": "^12.9.1",
         "@react-native-firebase/messaging": "^12.9.1",
@@ -2821,6 +2822,14 @@
       },
       "engines": {
         "node": "^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0"
+      }
+    },
+    "node_modules/@notifee/react-native": {
+      "version": "3.0.4",
+      "resolved": "https://registry.npmjs.org/@notifee/react-native/-/react-native-3.0.4.tgz",
+      "integrity": "sha512-a/SMIDJLTRElBql9+FLUU+VQek+iOvb/BcBr3fhORhI17pmrOpNnfoVBguoimr/JFK8k8/3uVXF02uDwuJvUCQ==",
+      "peerDependencies": {
+        "react-native": "*"
       }
     },
     "node_modules/@react-native-async-storage/async-storage": {
@@ -15076,6 +15085,12 @@
         "@types/yargs": "^16.0.0",
         "chalk": "^4.0.0"
       }
+    },
+    "@notifee/react-native": {
+      "version": "3.0.4",
+      "resolved": "https://registry.npmjs.org/@notifee/react-native/-/react-native-3.0.4.tgz",
+      "integrity": "sha512-a/SMIDJLTRElBql9+FLUU+VQek+iOvb/BcBr3fhORhI17pmrOpNnfoVBguoimr/JFK8k8/3uVXF02uDwuJvUCQ==",
+      "requires": {}
     },
     "@react-native-async-storage/async-storage": {
       "version": "1.15.9",

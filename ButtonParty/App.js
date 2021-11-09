@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
+import notifee, { EventType } from '@notifee/react-native';
 
 export default function App() {
   //Setting up hook variables for streak and points
@@ -11,6 +12,32 @@ export default function App() {
   let [active, setActive] = useState(false);
   let username = "bdngeorge";
 
+  async function onMessageReceived(message) {
+    // Create a channel
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+    });
+
+    // Display a notification
+    await notifee.displayNotification({
+      title: '<p style="color:red;"><b>Press the Button</b></p>',
+      body: '<em>You have 1 minute to press the button!</em>',
+      android: {
+        channelId : 'default',
+          autoCancel : true,
+          pressAction: {
+              id: "default",
+          },
+      }
+    });
+  }
+
+  notifee.onBackgroundEvent(async ({ type, detail }) => {
+    if (type === EventType.PRESS) {
+      console.log('User pressed the notification.', detail.pressAction.id);
+    }
+  });
   useEffect(() => {
     const foreground = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage['data']['message']));
@@ -22,6 +49,7 @@ export default function App() {
   useEffect(() => {
     const background = messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', JSON.stringify(remoteMessage['data']['message']));
+      onMessageReceived(remoteMessage);
       setActive(true);
     });
 
@@ -78,6 +106,7 @@ export default function App() {
         <Button style={styles.buttomButton} onPress={() => setStreak(0)} title="Clear"/>
         <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
         <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
+        <Button title="Display Notification" onPress={() => onMessageReceived()} />
       </View>
       <Text>Active: {active ? "true" : "false"}</Text>
     </View>
