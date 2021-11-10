@@ -1,5 +1,7 @@
 # ButtonParty
 
+Alex Pinkowski, Bill Ni, Brandon George, Sage Charity Griffiths
+
 ## Stack
 ### Frontend
  - React Native
@@ -75,6 +77,14 @@ The RDS consists of a serverless Aurora cluster with a minimum allocation of 1 c
 | robocop  | 12890 | 4      | false   |
 | loki     | 5     | 0      | false   |
 | dumbledore | 320 | 8      | false   |
+
+*FreezePowerup*
+
+| username   | activeUntil      |
+|------------|------------------|
+| robocop    | 11/20/21 9:00 PM |
+| loki       | 9/3/21 11:00 AM  |
+| dumbledore | 12/6/21 4:00 PM  |
 
 #### Lambda
 We have one Lambda function supporting the `/fetch` route on our API Gateway. This lends itself to even more compartmentalization as our Lambda is not permitted to write to the database in any way, only the EC2 instances, more specifically, just the incoming-traffic-handler (more details in the EC2 section).
