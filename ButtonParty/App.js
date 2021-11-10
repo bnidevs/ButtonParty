@@ -3,6 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
+import {Authentication, Authenticated} from 'screens'
+
+//oauth packages
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-community/google-signin';
+
+GoogleSignin.configure({
+  webClientId:
+    '260759292128-4h94uja4bu3ad9ci5qqagubi6k1m0jfv.apps.googleusercontent.com',
+});
+
 
 export default function App() {
   //Setting up hook variables for streak and points
@@ -61,6 +72,41 @@ export default function App() {
       </TouchableHighlight>
     );
   }
+
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId:
+       '582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com',
+    });
+  }, []);
+
+  async function onGoogleButtonPress() {
+    // Get the users ID token
+    const { idToken } = await GoogleSignin.signIn();
+
+    // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
+  }
+  auth().onAuthStateChanged((user) => {
+    if (user) {
+      setAuthenticated(true);
+    } else {
+      setAuthenticated(false);
+    }
+  });
+
+  if (authenticated) {
+    return <Authenticated />;
+  }
+
+  return <Authentication onGoogleButtonPress={onGoogleButtonPress} />;
+
+
 
   return (
     <View style={styles.container}>
