@@ -44,7 +44,7 @@ Players can purchase a multiplier to increase the amount of points they receive 
 See [`cftemplate.json`](https://github.com/bnidevs/ButtonParty/blob/main/cftemplate.json) (CloudFormation template) for more configuration details
 
 #### API Gateway
-The API Gateway is set up with 3 routes:
+The API Gateway is set up with 4 routes:
  - `add` - POST
 
    - This route handles adding user accounts to the database (and by extension, the leaderboard).
