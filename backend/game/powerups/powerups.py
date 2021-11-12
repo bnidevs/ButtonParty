@@ -19,22 +19,6 @@ def check_for_powerup_purchases( ):
     receiptHandles = []
 
     for message in messages:
-        body = json.loads(message['Body'])
-
-        username = body['username']
-        powerUpType = body['powerUpType']
-        quantity = body['quantity']
-
-        # Power Up types
-        if(powerUpType == "FREEZE"):
-            activate_Freeze(username, quantity)
-        elif(powerUpType == "MULTIPLIER"):
-            activate_Multiplier(username, quantity)
-        elif(powerUpType == "EXTENDER"):
-            pass
-        else:
-            print('Invalid Power Up Type')
-
 
         # Handle deleting the messages
         id = message['MessageId']
@@ -46,6 +30,25 @@ def check_for_powerup_purchases( ):
             'Id': id,
             'ReceiptHandle': receiptHandle
         })
+
+        try:
+            body = json.loads(message['Body'])
+            username = body['username']
+            powerUpType = body['powerUpType']
+            quantity = body['quantity']
+        except Exception as err:
+            print("Invalid Bosy")
+            continue
+
+        # Power Up types
+        if(powerUpType == "FREEZE"):
+            activate_Freeze(username, quantity)
+        elif(powerUpType == "MULTIPLIER"):
+            activate_Multiplier(username, quantity)
+        elif(powerUpType == "EXTENDER"):
+            pass
+        else:
+            print('Invalid Power Up Type')
 
     # Delete messages
     try:
