@@ -6,6 +6,7 @@ sys.path.append(os.path.abspath('../../aws'))
 from sqs import receive_messages_from_SQS, delete_messages_from_SQS
 from constants import SQS_POWERUPS_QUEUE_URL
 from freeze import activate_Freeze
+from multiplier import activate_Multiplier
 
 def check_for_powerup_purchases( ):
     # Read from the SQS for power ups
@@ -22,11 +23,15 @@ def check_for_powerup_purchases( ):
 
         username = body['username']
         powerUpType = body['powerUpType']
-        duration = body['duration']
+        quantity = body['quantity']
 
         # Power Up types
         if(powerUpType == "FREEZE"):
-            activate_Freeze(username, duration)
+            activate_Freeze(username, quantity)
+        elif(powerUpType == "MULTIPLIER"):
+            activate_Multiplier(username, quantity)
+        elif(powerUpType == "EXTENDER"):
+            pass
         else:
             print('Invalid Power Up Type')
 
