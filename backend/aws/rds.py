@@ -60,6 +60,16 @@ def add_user_to_RDS(username=random.randint(1000000,9999999)):
             {'name': 'new_username', 'value': {'stringValue': str(username)}}
             ]
     )
+    RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = 'INSERT INTO MultiplierPowerUp VALUES(:new_username, NULL, 1)',
+        parameters = [
+            {'name': 'new_username', 'value': {'stringValue': str(username)}}
+            ]
+    )
 
 def get_user_from_RDS(username):
     response = RDS_CLIENT.execute_statement(
