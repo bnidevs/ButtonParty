@@ -20,9 +20,21 @@ Players can use their points to purchase powerups, which will provide varying ki
 
 Players can purchase a freeze to nullify button presses for a certain amount of time.
 
+Options: (in hours)
+
+| 6 | 12 | 24 | 48 |
+|---|----|----|----|
+
 #### Multiplier
 
 Players can purchase a multiplier to increase the amount of points they receive per button press for a certain amount of time.
+
+Options: 
+
+| x2 | x3 | x5 | x10 |
+|----|----|----|-----|
+
+(multipliers last for 6 hours)
 
 ## Stack
 ### Frontend
@@ -92,13 +104,16 @@ The RDS consists of a serverless Aurora cluster with a minimum allocation of 1 c
 
 **Schemas**
 
+Note: Assume today's date is 11/9/2021
+
 *Users*
 
-| username | score | streak | pressed |
-|----------|-------|--------|---------|
-| robocop  | 12890 | 4      | false   |
-| loki     | 5     | 0      | false   |
-| dumbledore | 320 | 8      | false   |
+| username   | score | streak | pressed |
+|------------|-------|--------|---------|
+| robocop    | 12890 | 4      | false   |
+| loki       | 5     | 0      | false   |
+| dumbledore | 320   | 8      | false   |
+| batman     | 42    | 5      | true    |
 
 *FreezePowerup*
 
@@ -107,6 +122,26 @@ The RDS consists of a serverless Aurora cluster with a minimum allocation of 1 c
 | robocop    | 11/20/21 9:00 PM |
 | loki       | 9/3/21 11:00 AM  |
 | dumbledore | 12/6/21 4:00 PM  |
+| batman     |             NULL |
+
+Notes:
+
+ 1. Because `batman` has never used a powerup, his `activeUntil` property is `NULL` until he does.
+ 2. You can see that `loki` has a freeze powerup that has passed. We leave this row in the database and just check the timestamp against the current time in our code.
+
+*MultiplierPowerup*
+
+| username   | multiplier | activeUntil      |
+|------------|------------|------------------|
+| robocop    |          2 | 11/20/21 9:00 PM |
+| loki       |          3 |  9/3/21 11:00 AM |
+| dumbledore |         10 |  12/6/21 4:00 PM |
+| batman     |          1 |             NULL |
+
+Notes: 
+
+ 1. Again, because `batman` has never used a powerup, his `activeUntil` property is `NULL` until he does. But all `multiplier` values default to 1.
+ 2. You can see that `loki` has a multiplier powerup that has passed. We leave this row in the database and just check the timestamp against the current time in our code.
 
 #### Lambda
 We have one Lambda function supporting the `/fetch` route on our API Gateway. This lends itself to even more compartmentalization as our Lambda is not permitted to write to the database in any way, only the EC2 instances, more specifically, just the incoming-traffic-handler (more details in the EC2 section).
