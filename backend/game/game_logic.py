@@ -8,7 +8,7 @@ import time
 import json
 
 from constants import BUTTON_FREQUENCY, TIME_TO_PRESS, SQS_SCORING_QUEUE_URL, SQS_TIMESTAMP_QUEUE_URL
-from rds import get_user_from_RDS, update_user_in_RDS, set_late_users_streak_to_zero, set_pressed_to_false_for_all
+from rds import get_user_from_RDS, update_user_in_RDS, set_late_users_streak_to_zero, set_pressed_to_false_for_all, get_multiplier_of_user
 from sqs import receive_messages_from_SQS, delete_messages_from_SQS, purge_queue_from_SQS, send_message_to_SQS, add_new_users
 from powerups import check_for_powerup_purchases
 from sns import send_message_to_SNS
@@ -67,6 +67,7 @@ def is_valid_timestamp( timestamp_from_request ):
 def increment_score(username, player_timestamp):
     try:
         user = get_user_from_RDS( username )
+        multiplier = get_multiplier_of_user( username )
     except Exception as err:
         print('Unable to get User', err)
         return
@@ -81,9 +82,9 @@ def increment_score(username, player_timestamp):
 
     streak = user['streak'] + 1
     if(streak <= 10):
-        new_score = user['score'] + streak
+        new_score = user['score'] + streak * multiplier
     else:
-        new_score =  user['score'] + (streak * streak)
+        new_score =  user['score'] + (streak * streak) * multiplier
 
     try:
         update_user_in_RDS( username=user['username'], score=new_score, streak=streak )
@@ -121,7 +122,7 @@ def check_the_pressed_buttons():
 
 if __name__ == '__main__':
     print("1 - Check for all 3 SQS requests (users, presses, powerups)")
-    print("2 - Run check for pressed button and purchases")
+    print("2 - Run check for pressed button")
     print("3 - Run the random button press")
     print("4 - Force Button press")
     num = int(input("Input 1-4: "))
@@ -132,7 +133,7 @@ if __name__ == '__main__':
             check_for_powerup_purchases()
     elif( num == 2 ):
         while(True):
-            check_for_powerup_purchases()
+            check_the_pressed_buttons()
     elif( num == 3 ):
         while(True):
             run_button_game();

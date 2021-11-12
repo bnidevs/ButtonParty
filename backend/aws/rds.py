@@ -5,7 +5,7 @@ import json
 import random
 
 from constants import RDS_CLIENT, RDS_RESOURCE_ARN, RDS_SECRET_ARN, DATABASE_NAME
-from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL
+from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL, GET_MULTIPLER_OF_USER
 
 def rds_update_freezer_table(username, sqlStatement):
     return RDS_CLIENT.execute_statement(
@@ -90,5 +90,35 @@ def update_user_in_RDS(username, score, streak):
             {'name': 'input_username', 'value': {'stringValue': str(username)}},
             {'name': 'new_score', 'value': {'longValue': score}},
             {'name': 'new_streak', 'value': {'longValue': streak}}
+            ]
+        )
+
+def get_multiplier_of_user(username):
+    response = RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = GET_MULTIPLER_OF_USER,
+        parameters = [
+            {'name': 'input_username', 'value': {'stringValue': str(username)}}
+        ]
+    )['records']
+
+    if(response):
+        return response[0][0]['longValue']
+    else:
+        return 1
+
+def rds_update_multiplier_table(username, multiplier, sqlStatement):
+    return RDS_CLIENT.execute_statement(
+        continueAfterTimeout = True,
+        resourceArn = RDS_RESOURCE_ARN,
+        secretArn = RDS_SECRET_ARN,
+        database = DATABASE_NAME,
+        sql = sqlStatement,
+        parameters = [
+            {'name': 'input_username', 'value': {'stringValue': str(username)}},
+            {'name': 'input_multiplier', 'value': {'longValue': multiplier}}
             ]
         )

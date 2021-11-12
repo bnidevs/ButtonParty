@@ -15,3 +15,14 @@ WHERE
                                 and NOW() <= FreezePowerUp.activeUntil )
 ;
 '''
+
+GET_MULTIPLER_OF_USER = '''
+SELECT
+	multiplier
+FROM
+	MultiplierPowerUp
+WHERE
+	activeUntil >= NOW()
+	and username = :input_username
+;
+'''
