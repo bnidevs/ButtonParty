@@ -39,6 +39,12 @@ Options:
 ## Stack
 ### Frontend
  - React Native
+
+We have compartmentalized our frontend and backend so all frontend actions will call the backend through our API, and no calculation or modification is done on the frontend except for identity saving.
+
+### Storyboard
+![](https://github.com/bnidevs/ButtonParty/blob/documentation/docs/storyboard.png?raw=true)
+
 ### Backend
  - AWS
    - EC2
