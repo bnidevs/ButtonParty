@@ -26,3 +26,14 @@ WHERE
 	and username = :input_username
 ;
 '''
+
+GET_EXTENDER_OF_USER = '''
+SELECT
+	multiplier
+FROM
+	ExtenderPowerUp
+WHERE
+	activeUntil >= NOW()
+	and username = :input_username
+;
+'''

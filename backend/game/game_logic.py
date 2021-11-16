@@ -8,12 +8,13 @@ import time
 import json
 
 from constants import BUTTON_FREQUENCY, TIME_TO_PRESS, SQS_SCORING_QUEUE_URL, SQS_TIMESTAMP_QUEUE_URL
-from rds import get_user_from_RDS, update_user_in_RDS, set_late_users_streak_to_zero, set_pressed_to_false_for_all, get_multiplier_of_user
+from rds import get_user_from_RDS, update_user_in_RDS, set_late_users_streak_to_zero, set_pressed_to_false_for_all, get_multiplier_of_user, get_extender_of_user
 from sqs import receive_messages_from_SQS, delete_messages_from_SQS, purge_queue_from_SQS, send_message_to_SQS, add_new_users
 from powerups import check_for_powerup_purchases
 from sns import send_message_to_SNS
 from helper import validateJson
 
+MAX_EXTENDER_PERIOD = 5
 timestamp_button_limit = None
 
 def call_events():
@@ -42,10 +43,8 @@ def reset_timestamp():
         return
     now = time.time() * 1000
     time_passed = ( now - timestamp_button_limit ) / 1000
-    if(time_passed >= TIME_TO_PRESS):
+    if(time_passed >= TIME_TO_PRESS * MAX_EXTENDER_PERIOD):
         timestamp_button_limit = None
-        set_late_users_streak_to_zero()
-
 
 def get_timestamp():
     global timestamp_button_limit
@@ -57,10 +56,10 @@ def get_timestamp():
             timestamp_button_limit = None
     return timestamp_button_limit
 
-def is_valid_timestamp( timestamp_from_request ):
+def is_valid_timestamp( timestamp_from_request, extender ):
     timestamp = get_timestamp()
     user_time_to_press = (timestamp_from_request - timestamp) / 1000
-    if( user_time_to_press <= TIME_TO_PRESS ):
+    if( user_time_to_press <= TIME_TO_PRESS * extender ):
         return True
     return False
 
@@ -68,11 +67,12 @@ def increment_score(username, player_timestamp):
     try:
         user = get_user_from_RDS( username )
         multiplier = get_multiplier_of_user( username )
+        extender = get_extender_of_user( username )
     except Exception as err:
         print('Unable to get User', err)
         return
 
-    if( not is_valid_timestamp( player_timestamp )):
+    if( not is_valid_timestamp( player_timestamp, extender )):
         print('TIME LIMIT EXCEEDED')
         return
 

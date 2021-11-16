@@ -5,19 +5,23 @@ import json
 import random
 
 from constants import RDS_CLIENT, RDS_RESOURCE_ARN, RDS_SECRET_ARN, DATABASE_NAME
-from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL, GET_MULTIPLER_OF_USER
+from sql import SET_LATE_USERS_STREAK_TO_ZERO_SQL, GET_MULTIPLER_OF_USER, GET_EXTENDER_OF_USER
 
-def rds_update_freezer_table(username, sqlStatement):
+def rds_execute_statement( sql, parameters ):
     return RDS_CLIENT.execute_statement(
         continueAfterTimeout = True,
         resourceArn = RDS_RESOURCE_ARN,
         secretArn = RDS_SECRET_ARN,
         database = DATABASE_NAME,
-        sql = sqlStatement,
-        parameters = [
-            {'name': 'input_username', 'value': {'stringValue': str(username)}}
-            ]
+        sql = sql,
+        parameters = parameters
         )
+
+def rds_update_freezer_table(username, sqlStatement):
+    parameters = parameters = [
+        {'name': 'input_username', 'value': {'stringValue': str(username)}}
+        ]
+    return rds_execute_statement(sqlStatement, parameters)
 
 def set_late_users_streak_to_zero():
     return RDS_CLIENT.execute_statement(
@@ -114,7 +118,16 @@ def get_multiplier_of_user(username):
             {'name': 'input_username', 'value': {'stringValue': str(username)}}
         ]
     )['records']
+    if(response):
+        return response[0][0]['longValue']
+    else:
+        return 1
 
+def get_extender_of_user( username ):
+    parameters = [
+        {'name': 'input_username', 'value': {'stringValue': str(username)}}
+    ]
+    response = rds_execute_statement(GET_EXTENDER_OF_USER, parameters)['records']
     if(response):
         return response[0][0]['longValue']
     else:
@@ -132,3 +145,5 @@ def rds_update_multiplier_table(username, multiplier, sqlStatement):
             {'name': 'input_multiplier', 'value': {'longValue': multiplier}}
             ]
         )
+
+print(get_extender_of_user('apinkow27'))
