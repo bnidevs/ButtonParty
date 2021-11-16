@@ -3,9 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
-
-
-
 //oauth packages
 import auth from '@react-native-firebase/auth';
 import {
@@ -26,7 +23,7 @@ export default function App() {
   let [streak, setStreak] = useState(0);
   let [points, setPoints] = useState(0);
   let [active, setActive] = useState(false);
-  let username = "bdngeorge";
+  let [username, setUsername] = useState("");
 
   useEffect(() => {
     const foreground = messaging().onMessage(async remoteMessage => {
@@ -83,7 +80,8 @@ export default function App() {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      this.setState({ userInfo });
+      setUsername(userInfo['user']['id']);
+      console.log(username);
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
