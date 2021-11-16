@@ -1,17 +1,28 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
 import notifee, { EventType } from '@notifee/react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+/*************************\
+    GLOBAL FUNCTIONS
+\*************************/
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   //Setting up hook variables for streak and points
   let [streak, setStreak] = useState(0);
   let [points, setPoints] = useState(0);
   let [active, setActive] = useState(false);
+  const [authenticated, setAutheticated] = useState(false);
   let username = "bdngeorge";
 
+
+  /*************************\
+    NOTIFICATION FUNCTIONS
+  \*************************/
   async function onMessageReceived(message) {
     // Create a channel
     const channelId = await notifee.createChannel({
@@ -32,7 +43,6 @@ export default function App() {
       }
     });
   }
-
   notifee.onBackgroundEvent(async ({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('User pressed the notification.', detail.pressAction.id);
@@ -41,6 +51,7 @@ export default function App() {
   useEffect(() => {
     const foreground = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage['data']['message']));
+      onMessageReceived(remoteMessage);
       setActive(true);
       setTimeout(() => { setActive(false); }, 60000);
     });
@@ -58,7 +69,20 @@ export default function App() {
     return background;
   }, []);
 
-  //Called when button is pressed, handles points increment
+
+  /*************************\
+    GOOGLE OAUTH FUNCTIONS
+  \*************************/
+  // async function onGoogleButtonPress() {
+  //   const { idToken } = await GoogleSignin.signIn();
+  //   const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+  //   return auth().signInWithCredential(googleCredential);
+  // }
+
+
+  /*************************\
+      BUTTON FUNCTIONS
+  \*************************/
   const onPress = async () => {
     setActive(false);
     messaging().getToken().then(rtrn => console.log(rtrn));
@@ -87,44 +111,91 @@ export default function App() {
         onPress={onPress}
         style={[styles.button, active ? styles.enabled : styles.disabled]}
       >
-        <Text style={styles.appButtonText}>{active ? title : "Disabled"}</Text>
+        <Text style={styles.appButtonText}>{title}</Text>
       </TouchableHighlight>
     );
   }
 
+  /*************************\
+    SCREEN FUNCTIONS
+  \*************************/
+  const button_screen = ({navigation}) => {
+    return (
+      <View style={styles.buttonContainer}>
+        <View style={styles.topText}>
+          <Text style={styles.Title}>BUTTON PARTY</Text>
+          <Text style={styles.Scores}>
+            <Text style={styles.points}>Points: {points}                                                </Text>
+            <Text style={styles.streak}>Streak: {streak}</Text>
+          </Text>
+        </View>
+        <View style={styles.button}>
+          <AppButton onPress={onPress} title="The Button"/>
+        </View>
+        <View style={styles.tempButtons}>
+          <Button style={styles.buttomButton} onPress={() => setStreak(0)} title="Clear"/>
+          <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
+          <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
+          <Button title="Display Notification" onPress={() => onMessageReceived()} />
+          <Button
+            title="Switch Screens"
+            onPress={() => 
+              navigation.navigate('Test')
+            }
+          />
+        </View>
+        <Text>Active: {active ? "true" : "false"}</Text>
+      </View>
+    );
+  }
+
+  const signIn_screen = ({navigation}) => {
+    return (
+      <View style={styles.signinContainer}>
+        <Text style={styles.topText, styles.Title}>Sign In</Text>
+        <Button
+          title="Return to button"
+          onPress={() => 
+            navigation.navigate('Button')
+          }
+        />
+      </View>
+    );
+  }
+
+  /*************************\
+            RETURN 
+  \*************************/
   return (
-    <View style={styles.container}>
-      <View style={styles.topText}>
-        <Text style={styles.Title}>BUTTON PARTY</Text>
-        <Text style={styles.Scores}>
-          <Text style={styles.points}>Points: {points}                                                </Text>
-          <Text style={styles.streak}>Streak: {streak}</Text>
-        </Text>
-      </View>
-      <View style={styles.button}>
-        <AppButton onPress={onPress} title="Press"/>
-      </View>
-      <View style={styles.tempButtons}>
-        <Button style={styles.buttomButton} onPress={() => setStreak(0)} title="Clear"/>
-        <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
-        <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
-        <Button title="Display Notification" onPress={() => onMessageReceived()} />
-      </View>
-      <Text>Active: {active ? "true" : "false"}</Text>
-    </View>
-);
+    <NavigationContainer>
+      <Stack.Navigator>             
+        <Stack.Screen name="Test" component={signIn_screen} options={{ headerShown: false}} />      
+        <Stack.Screen name="Button" component={button_screen} options={{ headerShown: false}} />   
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
 
+/*************************\
+          STYLES
+\*************************/
 const styles = StyleSheet.create({
-  container: {
+  buttonContainer: {
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#c2c2c2',
     justifyContent: 'space-between'
   },
+  signinContainer: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#c2c2c2',
+    justifyContent: 'space-evenly'
+  },
   topText: {
     flex: .15,
     alignItems: 'center',
+    top: 0,
     textTransform: 'uppercase',
   },
   Title: {
