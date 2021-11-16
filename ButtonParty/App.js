@@ -3,11 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { TouchableHighlight, ImageBackground, StyleSheet, View, Text, Button, Alert } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import messaging from '@react-native-firebase/messaging';
-import {Authentication, Authenticated} from 'screens'
+
+
 
 //oauth packages
 import auth from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-community/google-signin';
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+
 
 GoogleSignin.configure({
   webClientId:
@@ -73,38 +79,23 @@ export default function App() {
     );
   }
 
-  const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    GoogleSignin.configure({
-      webClientId:
-       '582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com',
-    });
-  }, []);
-
-  async function onGoogleButtonPress() {
-    // Get the users ID token
-    const { idToken } = await GoogleSignin.signIn();
-
-    // Create a Google credential with the token
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-    // Sign-in the user with the credential
-    return auth().signInWithCredential(googleCredential);
-  }
-  auth().onAuthStateChanged((user) => {
-    if (user) {
-      setAuthenticated(true);
-    } else {
-      setAuthenticated(false);
+  const signIn = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const userInfo = await GoogleSignin.signIn();
+      this.setState({ userInfo });
+    } catch (error) {
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
     }
-  });
-
-  if (authenticated) {
-    return <Authenticated />;
-  }
-
-  return <Authentication onGoogleButtonPress={onGoogleButtonPress} />;
+  };
 
 
 
@@ -125,6 +116,12 @@ export default function App() {
         <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
         <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
       </View>
+      <GoogleSigninButton
+        style={{ width: 192, height: 48 }}
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={signIn}
+      />
       <Text>Active: {active ? "true" : "false"}</Text>
     </View>
 );
