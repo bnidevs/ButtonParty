@@ -91,6 +91,8 @@ def increment_score(username, player_timestamp):
     except Exception as err:
         print('Unable to update RDS', err)
 
+    print(f"User {username} successfully pressed the button")
+
 def remove_duplicates(messages):
     if(not messages):
         return []
@@ -115,7 +117,8 @@ def check_the_pressed_buttons():
             'ReceiptHandle': message['ReceiptHandle']
         })
         player_timestamp = int(message['Attributes']['SentTimestamp'])
-        username = message['Body']
+        body = json.loads(message['Body'])
+        username = body['username']
         increment_score( username, player_timestamp );
     delete_messages_from_SQS( receiptHandles, SQS_SCORING_QUEUE_URL )
     return True

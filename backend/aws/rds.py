@@ -123,7 +123,7 @@ def get_extender_of_user( username ):
     ]
     response = rds_execute_statement(GET_EXTENDER_OF_USER, parameters)['records']
     if(response):
-        return response[0][0]['longValue']
+        return response[0][0]['doubleValue']
     else:
         return 1
 
