@@ -17,12 +17,6 @@ def rds_execute_statement( sql, parameters ):
         parameters = parameters
         )
 
-def rds_update_freezer_table(username, sqlStatement):
-    parameters = parameters = [
-        {'name': 'input_username', 'value': {'stringValue': str(username)}}
-        ]
-    return rds_execute_statement(sqlStatement, parameters)
-
 def set_late_users_streak_to_zero():
     return RDS_CLIENT.execute_statement(
         continueAfterTimeout = True,
@@ -133,17 +127,23 @@ def get_extender_of_user( username ):
     else:
         return 1
 
-def rds_update_multiplier_table(username, multiplier, sqlStatement):
-    return RDS_CLIENT.execute_statement(
-        continueAfterTimeout = True,
-        resourceArn = RDS_RESOURCE_ARN,
-        secretArn = RDS_SECRET_ARN,
-        database = DATABASE_NAME,
-        sql = sqlStatement,
-        parameters = [
-            {'name': 'input_username', 'value': {'stringValue': str(username)}},
-            {'name': 'input_multiplier', 'value': {'longValue': multiplier}}
-            ]
-        )
+# Table updates
+def rds_update_freezer_table(username, sqlStatement):
+    parameters = parameters = [
+        {'name': 'input_username', 'value': {'stringValue': str(username)}}
+        ]
+    return rds_execute_statement(sqlStatement, parameters)
 
-print(get_extender_of_user('apinkow27'))
+def rds_update_multiplier_table(username, multiplier, sqlStatement):
+    parameters = [
+        {'name': 'input_username', 'value': {'stringValue': str(username)}},
+        {'name': 'input_multiplier', 'value': {'longValue': multiplier}}
+        ]
+    return rds_execute_statement( sqlStatement, parameters)
+
+def rds_update_extender_table(username, multiplier, sqlStatement):
+    parameters = [
+        {'name': 'input_username', 'value': {'stringValue': str(username)}},
+        {'name': 'input_multiplier', 'value': {'doubleValue': multiplier}}
+        ]
+    return rds_execute_statement( sqlStatement, parameters )

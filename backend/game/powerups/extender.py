@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.abspath('../../aws'))
 sys.path.append(os.path.abspath('../../'))
 
-from rds import get_user_from_RDS, update_user_in_RDS, rds_update_multiplier_table
+from rds import get_user_from_RDS, update_user_in_RDS, rds_update_extender_table
 
 sql = '''
 UPDATE ExtenderPowerUp
@@ -18,15 +18,15 @@ PRICE_3x_EXTENDER = 330
 PRICE_5x_EXTENDER = 700
 
 priceOfExtender = {
-    2: PRICE_1Halfx_EXTENDER,
-    3: PRICE_2x_EXTENDER,
-    5: PRICE_3x_EXTENDER,
-    10: PRICE_5x_EXTENDER
+    1.5: PRICE_1Halfx_EXTENDER,
+    2: PRICE_2x_EXTENDER,
+    3: PRICE_3x_EXTENDER,
+    5: PRICE_5x_EXTENDER
 }
 
 def activate_Extender(username, multiplier):
     # Make sure there is a valid multiplier
-    if(multiplier not in priceOfMultiplier):
+    if(multiplier not in priceOfExtender):
         return
 
     # Get the user information
@@ -35,11 +35,11 @@ def activate_Extender(username, multiplier):
     streak = rdsUser['streak']
 
     # Check to make sure they have enough points
-    if( score < priceOfMultiplier[multiplier] ):
+    if( score < priceOfExtender[multiplier] ):
         return
 
-    # Activate the Multiplier
-    rds_update_multiplier_table( username, multiplier, sql )
+    # Activate the Extender
+    rds_update_extender_table( username, multiplier, sql )
 
     # Remove the points
-    update_user_in_RDS(username, score-priceOfMultiplier[multiplier], streak)
+    update_user_in_RDS(username, score-priceOfExtender[multiplier], streak)
