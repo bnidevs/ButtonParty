@@ -36,6 +36,17 @@ Options:
 
 (multipliers last for 6 hours)
 
+#### Extender
+
+Players can purchase a extender to increase the amount of time they have to press the button for a certain period.
+
+Options: 
+
+| x1.5 | x2 | x3 | x5 |
+|------|----|----|----|
+
+(base time is 100 seconds)
+
 ## Stack
 ### Frontend
  - React Native
@@ -142,6 +153,20 @@ Notes:
 | robocop    |          2 | 11/20/21 9:00 PM |
 | loki       |          3 |  9/3/21 11:00 AM |
 | dumbledore |         10 |  12/6/21 4:00 PM |
+| batman     |          1 |             NULL |
+
+Notes: 
+
+ 1. Again, because `batman` has never used a powerup, his `activeUntil` property is `NULL` until he does. But all `multiplier` values default to 1.
+ 2. You can see that `loki` has a multiplier powerup that has passed. We leave this row in the database and just check the timestamp against the current time in our code.
+
+*ExtenderPowerup*
+
+| username   | multiplier | activeUntil      |
+|------------|------------|------------------|
+| robocop    |          2 | 11/20/21 9:00 PM |
+| loki       |          3 |  9/3/21 11:00 AM |
+| dumbledore |        1.5 |  12/6/21 4:00 PM |
 | batman     |          1 |             NULL |
 
 Notes: 
