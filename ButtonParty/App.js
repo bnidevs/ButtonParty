@@ -23,6 +23,8 @@ import {
 GoogleSignin.configure({
   webClientId:
     '582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com',
+  androidClientId:
+    '582017907775-7ivc4ge4jma924p2d95719bh70v4pak8.apps.googleusercontent.com'
 });
 
 /*************************\
@@ -92,24 +94,31 @@ export default function App() {
   \*************************/
   const signIn = async () => {
     try {
-      console.log(0);
       await GoogleSignin.hasPlayServices();
-      console.log(1);
-      const userInfo = await GoogleSignin.signIn();
-      console.log(userInfo)
-      setUsername(userInfo['user']['id']);
-      console.log(username);
-      this.setState({ userInfo });
+
+      GoogleSignin.signIn().then(userInfo =>{ setUsername(userInfo['user']['id']);
+      console.log(userInfo);},error=>{console.log(username);
+        console.log(error);
+      });
+      //this.setState({ userInfo });
+
+      
+      
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
+        console.log("CANCELLED")
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // operation (e.g. sign in) is in progress already
+        console.log("IN-PROGRESS")
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // play services not available or outdated
+        console.log('PLAY-SERVICES-NOT-AVAILABLE')
       } else {
         // some other error happened
+        console.log("OTHER ERROR")
       }
+      
     }
   };
 
