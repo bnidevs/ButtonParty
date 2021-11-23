@@ -7,6 +7,7 @@ from sqs import receive_messages_from_SQS, delete_messages_from_SQS
 from constants import SQS_POWERUPS_QUEUE_URL
 from freeze import activate_Freeze
 from multiplier import activate_Multiplier
+from extender import activate_Extender
 
 def check_for_powerup_purchases( ):
     # Read from the SQS for power ups
@@ -46,7 +47,7 @@ def check_for_powerup_purchases( ):
         elif(powerUpType == "MULTIPLIER"):
             activate_Multiplier(username, quantity)
         elif(powerUpType == "EXTENDER"):
-            pass
+            activate_Extender(username, quantity)
         else:
             print('Invalid Power Up Type')
 
