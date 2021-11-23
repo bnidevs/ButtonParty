@@ -22,7 +22,7 @@ import {
 
 GoogleSignin.configure({
   webClientId:
-    '260759292128-4h94uja4bu3ad9ci5qqagubi6k1m0jfv.apps.googleusercontent.com',
+    '582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com',
 });
 
 /*************************\
@@ -92,8 +92,11 @@ export default function App() {
   \*************************/
   const signIn = async () => {
     try {
+      console.log(0);
       await GoogleSignin.hasPlayServices();
+      console.log(1);
       const userInfo = await GoogleSignin.signIn();
+      console.log(userInfo)
       setUsername(userInfo['user']['id']);
       console.log(username);
       this.setState({ userInfo });
