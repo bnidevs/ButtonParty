@@ -23,8 +23,7 @@ import {
 GoogleSignin.configure({
   webClientId:
     '582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com',
-  androidClientId:
-    '582017907775-7ivc4ge4jma924p2d95719bh70v4pak8.apps.googleusercontent.com'
+  offlineAccess: true
 });
 
 /*************************\
@@ -96,10 +95,16 @@ export default function App() {
     try {
       await GoogleSignin.hasPlayServices();
 
-      GoogleSignin.signIn().then(userInfo =>{ setUsername(userInfo['user']['id']);
-      console.log(userInfo);},error=>{console.log(username);
-        console.log(error);
-      });
+      GoogleSignin.signIn().then(
+        userInfo => {
+          setUsername(userInfo['user']['id']);
+          console.log(userInfo);
+        },
+        error=>{
+          console.log(username);
+          console.log(error);
+        }
+      );
       //this.setState({ userInfo });
 
       
