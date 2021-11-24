@@ -35,6 +35,7 @@ export default function App() {
   let [points, setPoints] = useState(0);
   let [active, setActive] = useState(false);
   let [username, setUsername] = useState("");
+  let [navigation, setNavigation] = useState("login");
   let usernameTmp = "bdngeorge";
 
 
@@ -99,16 +100,25 @@ export default function App() {
         userInfo => {
           setUsername(userInfo['user']['id']);
           console.log(userInfo);
+          fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/add', {
+            method: "POST",
+            body: JSON.stringify({
+              "RequestBody": {
+                "Body": {
+                  "username": username,
+                  "token": messaging().getToken()
+                }
+              }
+            })
+          });
+          setNavigation('Login');
         },
         error=>{
           console.log(username);
           console.log(error);
         }
       );
-      //this.setState({ userInfo });
 
-      
-      
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
@@ -167,7 +177,7 @@ export default function App() {
   /*************************\
     SCREEN FUNCTIONS
   \*************************/
-  const button_screen = ({navigation}) => {
+  const button_screen = () => {
     return (
       <View style={styles.buttonContainer}>
         <View style={styles.topText}>
@@ -178,40 +188,22 @@ export default function App() {
           </Text>
         </View>
         <View style={styles.button}>
-          <AppButton onPress={onPress} title="The Button"/>
-        </View>
-        <View style={styles.tempButtons}>
-          <Button style={styles.buttomButton} onPress={() => setStreak(0)} title="Clear"/>
-          <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
-          <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
-          <Button title="Display Notification" onPress={() => onMessageReceived()} />
-          <Button
-            title="Switch Screens"
-            onPress={() => 
-              navigation.navigate('Test')
-            }
-          />
+          <AppButton onPress={onPress}/>
         </View>
         <Text>Active: {active ? "true" : "false"}</Text>
       </View>
     );
   }
 
-  const signIn_screen = ({navigation}) => {
+  const signIn_screen = () => {
     return (
       <View style={styles.signinContainer}>
-        <Text style={styles.topText, styles.Title}>Sign In</Text>
-        <Button
-          title="Return to button"
-          onPress={() => 
-            navigation.navigate('Button')
-          }
-        />
+        <Text style={styles.topText, styles.Title}>ButtonParty</Text>
 
         <GoogleSigninButton
           style={{ width: 192, height: 48 }}
           size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Dark}
+          color={GoogleSigninButton.Color.Light}
           onPress={signIn}
         />
       </View>
@@ -224,8 +216,11 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>             
-        <Stack.Screen name="Test" component={signIn_screen} options={{ headerShown: false}} />      
-        <Stack.Screen name="Button" component={button_screen} options={{ headerShown: false}} />   
+        {
+          navigation == 'login' ?
+          <Stack.Screen name="Login" component={signIn_screen} options={{ headerShown: false}} /> :
+          <Stack.Screen name="Button" component={button_screen} options={{ headerShown: false}} />
+        }   
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -238,13 +233,13 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#c2c2c2',
+    backgroundColor: '#000',
     justifyContent: 'space-between'
   },
   signinContainer: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#c2c2c2',
+    backgroundColor: '#000',
     justifyContent: 'space-evenly'
   },
   topText: {
@@ -255,13 +250,13 @@ const styles = StyleSheet.create({
   },
   Title: {
     fontSize: 30,
-    color: '#000',
+    color: '#fff',
     fontWeight: 'bold',
   },
   Scores: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#fff',
   },
   button: {
     flex: .55,
