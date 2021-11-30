@@ -71,8 +71,7 @@ export default function App() {
     const foreground = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage['data']['message']));
       onMessageReceived(remoteMessage);
-      setActive(true);
-      setTimeout(() => { setActive(false); }, 60000);
+      buttonActive();
     });
 
     return foreground;
@@ -81,8 +80,7 @@ export default function App() {
     const background = messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', JSON.stringify(remoteMessage['data']['message']));
       onMessageReceived(remoteMessage);
-      setActive(true);
-      setTimeout(() => { setActive(false); }, 60000);
+      buttonActive();
     });
 
     return background;
@@ -141,6 +139,12 @@ export default function App() {
   /*************************\
       BUTTON FUNCTIONS
   \*************************/
+  function buttonActive() {
+    setActive(true);
+    setTimeout(() => { setActive(false); }, 60000);
+  }
+
+
   const onPress = async () => {
     setActive(false);
     messaging().getToken().then(rtrn => console.log(rtrn));
@@ -167,9 +171,9 @@ export default function App() {
         activeOpacity={.8}
         underlayColor="#db0000"
         onPress={onPress}
-        style={[styles.button, active ? styles.enabled : styles.disabled]}
+        style={[buttonStyle.button, active ? buttonStyle.enabled : buttonStyle.disabled]}
       >
-        <Text style={styles.appButtonText}>{title}</Text>
+        <Text></Text> 
       </TouchableHighlight>
     );
   }
@@ -179,33 +183,51 @@ export default function App() {
   \*************************/
   const button_screen = () => {
     return (
-      <View style={styles.buttonContainer}>
-        <View style={styles.topText}>
-          <Text style={styles.Title}>BUTTON PARTY</Text>
-          <Text style={styles.Scores}>
-            <Text style={styles.points}>Points: {points}                                                </Text>
-            <Text style={styles.streak}>Streak: {streak}</Text>
-          </Text>
+      <View style={{ flex: 1, backgroundColor: '#363636'}}>
+        <View style={{ flex: 1}}>
+          <Text style={home.title}>BUTTON PARTY</Text>
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={home.scoreText}>Points: {points}</Text>
+            <Text style={home.scoreText}>Streak: {streak}</Text>
+          </View>
+          <View style={{flexDirection: 'row-reverse'}}>
+            <TouchableHighlight 
+              activeOpacity={.8}
+              underlayColor="#db0000"
+              onPress={() => setNavigation('Inventory')}
+              style={home.shop}
+            >
+              <Text style={{fontWeight: 'bold', color: 'white'}}>SHOP</Text>
+            </TouchableHighlight>
+          </View>
         </View>
-        <View style={styles.button}>
+
+        <View style={{ flex: 2.5, justifyContent: 'center'}}>
           <AppButton onPress={onPress}/>
         </View>
-        <Text>Active: {active ? "true" : "false"}</Text>
+
+        <View style={{ flex: 1, flexDirection: 'column-reverse', alignItems: 'center' }}>
+           <Text style={{fontWeight: 'bold', color: 'grey', fontSize: 10}}>Trademark?</Text>
+        </View>
       </View>
     );
   }
 
   const signIn_screen = () => {
     return (
-      <View style={styles.signinContainer}>
-        <Text style={styles.topText, styles.Title}>ButtonParty</Text>
+      <View style={{flex: 1, backgroundColor: '#363636'}}>
+        <View style={{flex:1, flexDirection: 'column-reverse'}}>
+         <Text style={home.title}>ButtonParty</Text>
+        </View>
 
-        <GoogleSigninButton
-          style={{ width: 192, height: 48 }}
-          size={GoogleSigninButton.Size.Wide}
-          color={GoogleSigninButton.Color.Light}
-          onPress={signIn}
-        />
+        <View style={{flex:8, alignItems: 'center', justifyContent: 'center'}}>
+          <GoogleSigninButton
+            style={{width: 192, height: 48 }}
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Light}
+            onPress={signIn}
+          />
+        </View>
       </View>
     );
   }
@@ -229,42 +251,33 @@ export default function App() {
 /*************************\
           STYLES
 \*************************/
-const styles = StyleSheet.create({
-  buttonContainer: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#000',
-    justifyContent: 'space-between'
-  },
-  signinContainer: {
-    flex: 1,
-    alignItems: 'center',
-    backgroundColor: '#000',
-    justifyContent: 'space-evenly'
-  },
-  topText: {
-    flex: .15,
-    alignItems: 'center',
-    top: 0,
-    textTransform: 'uppercase',
-  },
-  Title: {
+const home = StyleSheet.create({
+  title: {
     fontSize: 30,
-    color: '#fff',
     fontWeight: 'bold',
+    color: 'white',
+    alignSelf: 'center',
+    paddingBottom: 15
   },
-  Scores: {
+  scoreText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
+    color: 'white',
+    padding: 5
   },
+  shop: {
+    backgroundColor: '#ff0000',
+    width: 75,
+    height: 75,
+    borderRadius: 75,
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+});
+
+const buttonStyle = StyleSheet.create({
   button: {
-    flex: .55,
-  },
-  tempButtons: {
-    flex: .3,
-  },
-  button: {
+    alignSelf: 'center',
     width: 350,
     height: 350,
     borderRadius: 390,
@@ -277,12 +290,5 @@ const styles = StyleSheet.create({
   },
   disabled: {
     backgroundColor: '#db0000',
-  },
-  appButtonText: {
-    fontSize: 30,
-    color: '#000',
-    fontWeight: 'bold',
-    alignSelf: 'center',
-    textTransform: 'uppercase'
   },
 });
