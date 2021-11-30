@@ -1,17 +1,31 @@
 import json
-import boto3
+import sys
+import os
+sys.path.append(os.path.abspath('../'))
 
-from constants import QUEUE_URL, REGION, RDS_CLIENT, SQS_CLIENT
+from constants import SQS_INCOMING_QUEUE_URL, REGION, SQS_CLIENT
 from rds import add_user_to_RDS
+from sns import add_platform_app_endpoint, subscribe_endpoint_to_topic
 
-def delete_messages_from_SQS( receipt_handle ):
+def delete_messages_from_SQS( receipt_handle, QUEUE_URL ):
     # Delete received message from queue
     SQS_CLIENT.delete_message_batch(
         QueueUrl=QUEUE_URL,
         Entries=receipt_handle
     )
 
-def receive_messages_from_SQS():
+def purge_queue_from_SQS ( QUEUE_URL ):
+    SQS_CLIENT.purge_queue(
+        QueueUrl=QUEUE_URL
+    )
+
+def send_message_to_SQS( message, QUEUE_URL ):
+    SQS_CLIENT.send_message(
+        QueueUrl=QUEUE_URL,
+        MessageBody=message
+    )
+
+def receive_messages_from_SQS( QUEUE_URL ):
     # Receive message from SQS queue
     response = SQS_CLIENT.receive_message(
         QueueUrl=QUEUE_URL,
@@ -22,7 +36,7 @@ def receive_messages_from_SQS():
         MessageAttributeNames=[
             'All'
         ],
-        VisibilityTimeout=10,
+        VisibilityTimeout=1,
         WaitTimeSeconds= 3
     )
 
@@ -32,7 +46,7 @@ def receive_messages_from_SQS():
 
 def add_new_users():
     # Read up to 10 messages
-    messages = receive_messages_from_SQS()
+    messages = receive_messages_from_SQS( SQS_INCOMING_QUEUE_URL )
 
     if(not messages):
         return False
@@ -40,7 +54,10 @@ def add_new_users():
     receiptHandles = []
     receiptHandlesSet = set()
     for message in messages:
-        username = message['Body']
+        body = json.loads(message['Body'])
+        username = body['username']
+        token = body['token']
+
         id = message['MessageId']
         receiptHandle = message['ReceiptHandle']
 
@@ -53,20 +70,15 @@ def add_new_users():
             'ReceiptHandle': receiptHandle
         })
         try:
-            add_user_to_RDS(RDS_CLIENT, username)
+            add_user_to_RDS(username)
+            subscribe_endpoint_to_topic( add_platform_app_endpoint(token) )
         except Exception as err:
             print(f'Unable to add user: {username}\n', err)
 
     # Delete messages
     try:
-        delete_messages_from_SQS( receiptHandles )
+        delete_messages_from_SQS( receiptHandles, SQS_INCOMING_QUEUE_URL )
     except Exception as err:
         print('Error deleting message', err)
 
     return True
-
-
-if __name__ == '__main__':
-
-    while(add_new_users()):
-        pass

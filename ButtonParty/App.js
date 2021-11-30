@@ -62,6 +62,7 @@ export default function App() {
       }
     });
   }
+
   notifee.onBackgroundEvent(async ({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('User pressed the notification.', detail.pressAction.id);
