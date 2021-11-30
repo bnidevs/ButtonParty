@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "582017907775-jdv7jh10mjf3cs9b2r52i7uqkik4equ7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.buttonparty",
+            "certificate_hash": "b2d3926218d018135e6830fa6e21d70dfec87fe9"
+          }
+        },
+        {
           "client_id": "582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com",
           "client_type": 3
         }

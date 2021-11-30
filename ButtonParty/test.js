@@ -22,8 +22,7 @@ import {
 
 GoogleSignin.configure({
   webClientId:
-    '582017907775-cmhpth94hvbpj3fkh8jd847ig8omjr2a.apps.googleusercontent.com',
-  offlineAccess: true
+    '260759292128-4h94uja4bu3ad9ci5qqagubi6k1m0jfv.apps.googleusercontent.com',
 });
 
 /*************************\
@@ -35,7 +34,6 @@ export default function App() {
   let [points, setPoints] = useState(0);
   let [active, setActive] = useState(false);
   let [username, setUsername] = useState("");
-  let [navigation, setNavigation] = useState("login");
   let usernameTmp = "bdngeorge";
 
 
@@ -62,28 +60,6 @@ export default function App() {
       }
     });
   }
-
-  async function onMessageReceived(message) {
-    // Create a channel
-    const channelId = await notifee.createChannel({
-      id: 'default',
-      name: 'Default Channel',
-    });
-
-    // Display a notification
-    await notifee.displayNotification({
-      title: '<p style="color:red;"><b>Press the Button</b></p>',
-      body: '<em>You have 1 minute to press the button!</em>',
-      android: {
-        channelId : 'default',
-          autoCancel : true,
-          pressAction: {
-              id: "default",
-          },
-      }
-    });
-  }
-
   notifee.onBackgroundEvent(async ({ type, detail }) => {
     if (type === EventType.PRESS) {
       console.log('User pressed the notification.', detail.pressAction.id);
@@ -93,7 +69,8 @@ export default function App() {
     const foreground = messaging().onMessage(async remoteMessage => {
       console.log('A new FCM message arrived!', JSON.stringify(remoteMessage['data']['message']));
       onMessageReceived(remoteMessage);
-      buttonActive();
+      setActive(true);
+      setTimeout(() => { setActive(false); }, 60000);
     });
 
     return foreground;
@@ -102,7 +79,8 @@ export default function App() {
     const background = messaging().setBackgroundMessageHandler(async remoteMessage => {
       console.log('Message handled in the background!', JSON.stringify(remoteMessage['data']['message']));
       onMessageReceived(remoteMessage);
-      buttonActive();
+      setActive(true);
+      setTimeout(() => { setActive(false); }, 60000);
     });
 
     return background;
@@ -115,45 +93,20 @@ export default function App() {
   const signIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
-
-      GoogleSignin.signIn().then(
-        userInfo => {
-          setUsername(userInfo['user']['id']);
-          console.log(userInfo);
-          fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/add', {
-            method: "POST",
-            body: JSON.stringify({
-              "RequestBody": {
-                "Body": {
-                  "username": username,
-                  "token": messaging().getToken()
-                }
-              }
-            })
-          });
-          setNavigation('Login');
-        },
-        error=>{
-          console.log(username);
-          console.log(error);
-        }
-      );
-
+      const userInfo = await GoogleSignin.signIn();
+      setUsername(userInfo['user']['id']);
+      console.log(username);
+      this.setState({ userInfo });
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
-        console.log("CANCELLED")
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // operation (e.g. sign in) is in progress already
-        console.log("IN-PROGRESS")
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // play services not available or outdated
-        console.log('PLAY-SERVICES-NOT-AVAILABLE')
       } else {
         // some other error happened
-        console.log("OTHER ERROR")
       }
-      
     }
   };
 
@@ -161,12 +114,6 @@ export default function App() {
   /*************************\
       BUTTON FUNCTIONS
   \*************************/
-  function buttonActive() {
-    setActive(true);
-    setTimeout(() => { setActive(false); }, 60000);
-  }
-
-
   const onPress = async () => {
     setActive(false);
     messaging().getToken().then(rtrn => console.log(rtrn));
@@ -193,9 +140,9 @@ export default function App() {
         activeOpacity={.8}
         underlayColor="#db0000"
         onPress={onPress}
-        style={[buttonStyle.button, active ? buttonStyle.enabled : buttonStyle.disabled]}
+        style={[styles.button, active ? styles.enabled : styles.disabled]}
       >
-        <Text></Text> 
+        <Text style={styles.appButtonText}>{title}</Text>
       </TouchableHighlight>
     );
   }
@@ -203,53 +150,53 @@ export default function App() {
   /*************************\
     SCREEN FUNCTIONS
   \*************************/
-  const button_screen = () => {
+  const button_screen = ({navigation}) => {
     return (
-      <View style={{ flex: 1, backgroundColor: '#363636'}}>
-        <View style={{ flex: 1}}>
-          <Text style={home.title}>BUTTON PARTY</Text>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={home.scoreText}>Points: {points}</Text>
-            <Text style={home.scoreText}>Streak: {streak}</Text>
-          </View>
-          <View style={{flexDirection: 'row-reverse'}}>
-            <TouchableHighlight 
-              activeOpacity={.8}
-              underlayColor="#db0000"
-              onPress={() => setNavigation('Inventory')}
-              style={home.shop}
-            >
-              <Text style={{fontWeight: 'bold', color: 'white'}}>SHOP</Text>
-            </TouchableHighlight>
-          </View>
+      <View style={styles.buttonContainer}>
+        <View style={styles.topText}>
+          <Text style={styles.Title}>BUTTON PARTY</Text>
+          <Text style={styles.Scores}>
+            <Text style={styles.points}>Points: {points}                                                </Text>
+            <Text style={styles.streak}>Streak: {streak}</Text>
+          </Text>
         </View>
-
-        <View style={{ flex: 2.5, justifyContent: 'center'}}>
-          <AppButton onPress={onPress}/>
+        <View style={styles.button}>
+          <AppButton onPress={onPress} title="The Button"/>
         </View>
-
-        <View style={{ flex: 1, flexDirection: 'column-reverse', alignItems: 'center' }}>
-           <Text style={{fontWeight: 'bold', color: 'grey', fontSize: 10}}>Trademark?</Text>
+        <View style={styles.tempButtons}>
+          <Button style={styles.buttomButton} onPress={() => setStreak(0)} title="Clear"/>
+          <Button style={styles.buttomButton} onPress={() => setPoints(0)} title="Reset Points"/>
+          <Button style={styles.buttomButtom} onPress={() => setActive(!active)} title="Button ON/OFF"/>
+          <Button title="Display Notification" onPress={() => onMessageReceived()} />
+          <Button
+            title="Switch Screens"
+            onPress={() => 
+              navigation.navigate('Test')
+            }
+          />
         </View>
+        <Text>Active: {active ? "true" : "false"}</Text>
       </View>
     );
   }
 
-  const signIn_screen = () => {
+  const signIn_screen = ({navigation}) => {
     return (
-      <View style={{flex: 1, backgroundColor: '#363636'}}>
-        <View style={{flex:1, flexDirection: 'column-reverse'}}>
-         <Text style={home.title}>ButtonParty</Text>
-        </View>
+      <View style={styles.signinContainer}>
+        <Text style={styles.topText, styles.Title}>Sign In</Text>
+        <Button
+          title="Return to button"
+          onPress={() => 
+            navigation.navigate('Button')
+          }
+        />
 
-        <View style={{flex:8, alignItems: 'center', justifyContent: 'center'}}>
-          <GoogleSigninButton
-            style={{width: 192, height: 48 }}
-            size={GoogleSigninButton.Size.Wide}
-            color={GoogleSigninButton.Color.Light}
-            onPress={signIn}
-          />
-        </View>
+        <GoogleSigninButton
+          style={{ width: 192, height: 48 }}
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={signIn}
+        />
       </View>
     );
   }
@@ -260,11 +207,8 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>             
-        {
-          navigation == 'login' ?
-          <Stack.Screen name="Login" component={signIn_screen} options={{ headerShown: false}} /> :
-          <Stack.Screen name="Button" component={button_screen} options={{ headerShown: false}} />
-        }   
+        <Stack.Screen name="Test" component={signIn_screen} options={{ headerShown: false}} />      
+        <Stack.Screen name="Button" component={button_screen} options={{ headerShown: false}} />   
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -273,33 +217,42 @@ export default function App() {
 /*************************\
           STYLES
 \*************************/
-const home = StyleSheet.create({
-  title: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: 'white',
-    alignSelf: 'center',
-    paddingBottom: 15
+const styles = StyleSheet.create({
+  buttonContainer: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#c2c2c2',
+    justifyContent: 'space-between'
   },
-  scoreText: {
+  signinContainer: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#c2c2c2',
+    justifyContent: 'space-evenly'
+  },
+  topText: {
+    flex: .15,
+    alignItems: 'center',
+    top: 0,
+    textTransform: 'uppercase',
+  },
+  Title: {
+    fontSize: 30,
+    color: '#000',
+    fontWeight: 'bold',
+  },
+  Scores: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: 'white',
-    padding: 5
+    color: '#000',
   },
-  shop: {
-    backgroundColor: '#ff0000',
-    width: 75,
-    height: 75,
-    borderRadius: 75,
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-});
-
-const buttonStyle = StyleSheet.create({
   button: {
-    alignSelf: 'center',
+    flex: .55,
+  },
+  tempButtons: {
+    flex: .3,
+  },
+  button: {
     width: 350,
     height: 350,
     borderRadius: 390,
@@ -312,5 +265,12 @@ const buttonStyle = StyleSheet.create({
   },
   disabled: {
     backgroundColor: '#db0000',
+  },
+  appButtonText: {
+    fontSize: 30,
+    color: '#000',
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    textTransform: 'uppercase'
   },
 });
