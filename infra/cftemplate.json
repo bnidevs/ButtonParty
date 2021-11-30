@@ -19,11 +19,16 @@
 	    	"NoEcho": "true",
 	      	"Description" : "Password for accessing DB",
 	      	"Type": "String",
-	      	"ConstraintDescription" : "must contain only alphanumeric characters",
+	      	"ConstraintDescription" : "must contain only alphanumeric characters, and be between 8 and 30 characters",
 	      	"MinLength" : "8",
 	      	"MaxLength" : "30",
 	      	"AllowedPattern" : "[a-zA-Z0-9]*"
-	    }
+	    },
+		"LambdaBucket": {
+			"Description" : "Name of an existing S3 bucket with the fetch lambda deployment zip inside",
+			"Type": "String",
+			"ConstraintDescription" : "must be the name of an existing S3 bucket"
+	  	}
    	},
 	"Resources" : {
 	    "outgoingTrafficHandler" : {
@@ -300,6 +305,13 @@
 		      	"KmsMasterKeyId" : "alias/aws/sqs"
 		    }
     	},
+    	"powerupSQS": {
+    		"Type" : "AWS::SQS::Queue",
+		  	"Properties" : {
+		      	"DelaySeconds" : 0,
+		      	"KmsMasterKeyId" : "alias/aws/sqs"
+		    }
+    	},
     	"routingAPIGW": {
     		"Type" : "AWS::ApiGatewayV2::Api",
 			"Properties" : {
@@ -312,7 +324,7 @@
     		"Type" : "AWS::ApiGatewayV2::Route",
 		  	"Properties" : {
 		      	"ApiId" : { "Ref" : "routingAPIGW" },
-		      	"RouteKey" : "GET /add",
+		      	"RouteKey" : "POST /add",
 		      	"Target" : {
 	                "Fn::Join": [
 	                    "/",
@@ -342,7 +354,7 @@
 		      		"QueueUrl": {
 			      		"Ref" : "addUserSQS"
 			      	},
-		      		"MessageBody": "$request.querystring.body"
+		      		"MessageBody": "$request.body.RequestBody"
 		      	}
 		    }
     	},
@@ -350,7 +362,7 @@
     		"Type" : "AWS::ApiGatewayV2::Route",
 		  	"Properties" : {
 		      	"ApiId" : { "Ref" : "routingAPIGW" },
-		      	"RouteKey" : "GET /press",
+		      	"RouteKey" : "POST /press",
 		      	"Target" : {
 	                "Fn::Join": [
 	                    "/",
@@ -380,8 +392,81 @@
 		      		"QueueUrl": {
 			      		"Ref" : "pressButtonSQS"
 			      	},
-		      		"MessageBody": "$request.querystring.body"
+		      		"MessageBody": "$request.body.RequestBody"
 		      	}
+		    }
+    	},
+		"fetchSelfDataRoute": {
+    		"Type" : "AWS::ApiGatewayV2::Route",
+		  	"Properties" : {
+		      	"ApiId" : { "Ref" : "routingAPIGW" },
+		      	"RouteKey" : "GET /fetch/self",
+		      	"Target" : {
+	                "Fn::Join": [
+	                    "/",
+	                    [
+	                        "integrations",
+	                        {
+	                            "Ref": "fetchDataAPIIntegration"
+	                        }
+	                    ]
+	                ]
+	            }
+		    }
+    	},
+		"fetchLeaderboardRoute": {
+    		"Type" : "AWS::ApiGatewayV2::Route",
+		  	"Properties" : {
+		      	"ApiId" : { "Ref" : "routingAPIGW" },
+		      	"RouteKey" : "GET /fetch/lb",
+		      	"Target" : {
+	                "Fn::Join": [
+	                    "/",
+	                    [
+	                        "integrations",
+	                        {
+	                            "Ref": "fetchDataAPIIntegration"
+	                        }
+	                    ]
+	                ]
+	            }
+		    }
+    	},
+    	"fetchDataAPIIntegration": {
+    		"Type" : "AWS::ApiGatewayV2::Integration",
+		  	"Properties" : {
+		      	"ApiId" : { 
+		      		"Ref" : "routingAPIGW" 
+		      	},
+		      	"CredentialsArn" : { 
+		      		"Fn::GetAtt" : [ "APIGWRole" , "Arn" ] 
+		      	},
+		      	"IntegrationType" : "AWS_PROXY",
+				"IntegrationUri": {
+					"Fn::Join": [
+						"",
+						[
+							"arn:",
+							{
+								"Ref": "AWS::Partition"
+							},
+							":apigateway:",
+							{
+								"Ref": "AWS::Region"
+							},
+							":lambda:path/2015-03-31/functions/",
+							{
+								"Fn::GetAtt": [
+									"FetchDataLambda",
+									"Arn"
+								]
+							},
+							"/invocations"
+						]
+					]
+				},
+				"IntegrationMethod": "POST",
+				"PayloadFormatVersion": "2.0"
 		    }
     	},
     	"APIGWRole": {
@@ -428,6 +513,55 @@
 		                }
 			      	}
 		      	]
+		    }
+		},
+		"FetchDataLambda": {
+			"Type" : "AWS::Lambda::Function",
+			"Properties" : {
+				"Code" : {
+					"S3Bucket": {
+						"Ref" : "LambdaBucket"
+					},
+					"S3Key": "FetchHandler.zip"
+				},
+				"FunctionName" : "ButtonParty-DataFetch",
+				"Handler" : "lambda_function.lambda_handler",
+				"MemorySize" : 512,
+				"PackageType" : "Zip",
+				"Role" : {
+					"Fn::GetAtt" : [ "FetchDataLambdaRole" , "Arn" ] 
+				},
+				"Runtime" : "python3.9",
+				"Timeout" : 30
+			},
+			"Metadata": {
+				"Note": "THIS LAMBDA IS ASSUMED TO BE IN THE BUCKET ON DEPLOYMENT"
+			}
+		},
+		"FetchDataLambdaRole": {
+			"Type" : "AWS::IAM::Role",
+		  	"Properties" : {
+		  		"AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+				"ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/SecretsManagerReadWrite",
+					"arn:aws:iam::aws:policy/CloudWatchFullAccess",
+					"arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
+                ]
 		    }
 		}
   	}
