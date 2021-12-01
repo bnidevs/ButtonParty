@@ -151,8 +151,27 @@ export default function App() {
     messaging().getToken().then(rtrn => console.log(rtrn));
     var obj;
     try {
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press?body=' + username);
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press?body=', {
+            method: "POST",
+            body: JSON.stringify({
+              "RequestBody": {
+                "Body": {
+                  "username": username
+                }
+              }
+            })
+          });
+
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=', {
+        method: "POST",
+        body: JSON.stringify({
+          "RequestBody": {
+            "Body": {
+              "username": username
+            }
+          }
+        })
+      })
         .then(res => res.json())
         .then(data => obj = data)
         .then(() => console.log(obj));
