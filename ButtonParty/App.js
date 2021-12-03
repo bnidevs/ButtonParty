@@ -188,13 +188,12 @@ export default function App() {
           }
         })
       });
-      
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + userInfo['user']['id'])
-      .then(res => res.json())
-      .then(data => {
-        setPoints(data['score']);
-        setStreak(data['streak']);
-      });
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
+        .then(res => res.json())
+        .then(data => {
+          setPoints(data['score']);
+          setStreak(data['streak']);
+        });
     } catch (error) {
       console.log(error);
     }
