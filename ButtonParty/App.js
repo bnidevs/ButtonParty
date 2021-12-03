@@ -38,6 +38,25 @@ export default function App() {
   let [navigation, setNavigation] = useState("login");
   let usernameTmp = "bdngeorge";
 
+  /*************************\
+     USE EFFECT FUNCTIONS
+  \*************************/
+  useEffect(() => {
+    AsyncStorage.getItem('username')
+      .then(val => {
+        if(val != null) {
+          setUsername(val);
+          setNavigation('button');
+          fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + val)
+            .then(res => res.json())
+            .then(data => {
+              setPoints(data['score']);
+              setStreak(data['streak']);
+            });
+        }
+      },
+      error=>console.log(error));
+    }, []);
 
   /*************************\
     NOTIFICATION FUNCTIONS
@@ -115,28 +134,40 @@ export default function App() {
   const signIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      const mToken = await messaging().getToken()
+      console.log(mToken);
 
       GoogleSignin.signIn().then(
         userInfo => {
           setUsername(userInfo['user']['id']);
-          console.log(userInfo);
           fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/add', {
             method: "POST",
             body: JSON.stringify({
               "RequestBody": {
-                "Body": {
-                  "username": username,
-                  "token": messaging().getToken()
-                }
+                "username": userInfo['user']['id'],
+                "token": mToken
               }
             })
           });
-          setNavigation('Login');
+
+          fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + userInfo['user']['id'])
+            .then(res => res.json())
+            .then(data => {
+              setPoints(data['score']);
+              setStreak(data['streak']);
+            });
+          setNavigation('button');
+
+          AsyncStorage.setItem('username', '' + userInfo['user']['id']);
+
+        
         },
         error=>{
           console.log(username);
           console.log(error);
         }
+
+        
       );
 
     } catch (error) {
@@ -163,23 +194,31 @@ export default function App() {
   \*************************/
   function buttonActive() {
     setActive(true);
-    setTimeout(() => { setActive(false); }, 60000);
+    setTimeout(() => { setActive(false); }, 100000);
   }
 
 
   const onPress = async () => {
     setActive(false);
     messaging().getToken().then(rtrn => console.log(rtrn));
-    var obj;
     try {
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press?body=' + username);
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press', {
+        method: "POST",
+        body: JSON.stringify({
+          "RequestBody": {
+            "username": username,
+          }
+        })
+      });
+      setTimeout(() => { 
+        fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
         .then(res => res.json())
-        .then(data => obj = data)
-        .then(() => console.log(obj));
-
-      setPoints(obj['score']);
-      setStreak(obj['streak']);
+        .then(data => {
+          setPoints(data['score']);
+          setStreak(data['streak']);
+        });
+       }, 5000);
+      
     } catch (error) {
       console.log(error);
     }
@@ -242,7 +281,7 @@ export default function App() {
          <Text style={home.title}>ButtonParty</Text>
         </View>
 
-        <View style={{flex:8, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex:2, alignItems: 'center', justifyContent: 'center'}}>
           <GoogleSigninButton
             style={{width: 192, height: 48 }}
             size={GoogleSigninButton.Size.Wide}
@@ -311,6 +350,6 @@ const buttonStyle = StyleSheet.create({
     backgroundColor: '#ff0000',
   },
   disabled: {
-    backgroundColor: '#db0000',
+    backgroundColor: '#910000',
   },
 });
