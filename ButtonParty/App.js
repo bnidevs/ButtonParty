@@ -240,7 +240,7 @@ export default function App() {
          <Text style={home.title}>ButtonParty</Text>
         </View>
 
-        <View style={{flex:8, alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{flex:2, alignItems: 'center', justifyContent: 'center'}}>
           <GoogleSigninButton
             style={{width: 192, height: 48 }}
             size={GoogleSigninButton.Size.Wide}
