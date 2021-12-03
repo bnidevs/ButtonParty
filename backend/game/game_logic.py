@@ -128,7 +128,7 @@ if __name__ == '__main__':
     print("2 - Run check for pressed button")
     print("3 - Run the random button press")
     print("4 - Force Button press")
-    num = int(input("Input 1-4: "))
+    num = int(sys.argv[1])
     if( num == 1 ):
         while(True):
             add_new_users()

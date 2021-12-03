@@ -54,9 +54,6 @@ def add_new_users():
     receiptHandles = []
     receiptHandlesSet = set()
     for message in messages:
-        body = json.loads(message['Body'])
-        username = body['username']
-        token = body['token']
 
         id = message['MessageId']
         receiptHandle = message['ReceiptHandle']
@@ -69,6 +66,15 @@ def add_new_users():
             'Id': id,
             'ReceiptHandle': receiptHandle
         })
+
+        try:
+            body = json.loads(message['Body'])
+            username = body['username']
+            token = body['token']
+        except Exception as err:
+            print(err)
+            continue
+
         try:
             add_user_to_RDS(username)
             subscribe_endpoint_to_topic( add_platform_app_endpoint(token) )
