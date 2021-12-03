@@ -95,6 +95,7 @@ export default function App() {
     try {
       await GoogleSignin.hasPlayServices();
       const mToken = await messaging().getToken()
+      console.log(mToken);
 
       GoogleSignin.signIn().then(
         userInfo => {
@@ -156,7 +157,6 @@ export default function App() {
   const onPress = async () => {
     setActive(false);
     messaging().getToken().then(rtrn => console.log(rtrn));
-    var obj;
     try {
       await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press', {
         method: "POST",
@@ -168,11 +168,10 @@ export default function App() {
       });
       await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
         .then(res => res.json())
-        .then(data => obj = data)
-        .then(() => console.log(obj));
-
-      setPoints(obj['score']);
-      setStreak(obj['streak']);
+        .then(data => {
+          setPoints(data['score']);
+          setStreak(data['streak']);
+        });
     } catch (error) {
       console.log(error);
     }
