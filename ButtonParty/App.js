@@ -45,6 +45,7 @@ export default function App() {
     AsyncStorage.getItem('username')
       .then(val => {
         if(val != null) {
+          setUsername(val);
           setNavigation('button');
           fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + val)
             .then(res => res.json())
