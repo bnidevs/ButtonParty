@@ -94,6 +94,7 @@ export default function App() {
   const signIn = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      const mToken = await messaging().getToken()
 
       GoogleSignin.signIn().then(
         userInfo => {
@@ -103,10 +104,8 @@ export default function App() {
             method: "POST",
             body: JSON.stringify({
               "RequestBody": {
-                "Body": {
-                  "username": username,
-                  "token": messaging().getToken()
-                }
+                "username": userInfo['user']['id'],
+                "token": mToken
               }
             })
           });
@@ -151,27 +150,15 @@ export default function App() {
     messaging().getToken().then(rtrn => console.log(rtrn));
     var obj;
     try {
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press?body=', {
-            method: "POST",
-            body: JSON.stringify({
-              "RequestBody": {
-                "Body": {
-                  "username": username
-                }
-              }
-            })
-          });
-
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=', {
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/press', {
         method: "POST",
         body: JSON.stringify({
           "RequestBody": {
-            "Body": {
-              "username": username
-            }
+            "username": username,
           }
         })
-      })
+      });
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
         .then(res => res.json())
         .then(data => obj = data)
         .then(() => console.log(obj));
