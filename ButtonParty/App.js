@@ -38,6 +38,24 @@ export default function App() {
   let [navigation, setNavigation] = useState("login");
   let usernameTmp = "bdngeorge";
 
+  /*************************\
+     USE EFFECT FUNCTIONS
+  \*************************/
+  useEffect(() => {
+    AsyncStorage.getItem('username')
+      .then(val => {
+        if(val != null) {
+          setNavigation('button');
+          fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + val)
+            .then(res => res.json())
+            .then(data => {
+              setPoints(data['score']);
+              setStreak(data['streak']);
+            });
+        }
+      },
+      error=>console.log(error));
+    }, []);
 
   /*************************\
     NOTIFICATION FUNCTIONS
@@ -115,7 +133,11 @@ export default function App() {
               setPoints(data['score']);
               setStreak(data['streak']);
             });
-          setNavigation('Login');
+          setNavigation('button');
+
+          AsyncStorage.setItem('username', '' + userInfo['user']['id']);
+
+        
         },
         error=>{
           console.log(username);
@@ -166,13 +188,12 @@ export default function App() {
           }
         })
       });
-      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + username)
-        .then(res => res.json())
-        .then(data => obj = data)
-        .then(() => console.log(obj));
-
-      setPoints(obj['score']);
-      setStreak(obj['streak']);
+      await fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + userInfo['user']['id'])
+      .then(res => res.json())
+      .then(data => {
+        setPoints(data['score']);
+        setStreak(data['streak']);
+      });
     } catch (error) {
       console.log(error);
     }
