@@ -99,7 +99,6 @@ export default function App() {
       GoogleSignin.signIn().then(
         userInfo => {
           setUsername(userInfo['user']['id']);
-          console.log(userInfo);
           fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/add', {
             method: "POST",
             body: JSON.stringify({
@@ -109,6 +108,13 @@ export default function App() {
               }
             })
           });
+
+          fetch('https://qrtybatu2l.execute-api.us-east-1.amazonaws.com/fetch/self?username=' + userInfo['user']['id'])
+            .then(res => res.json())
+            .then(data => {
+              setPoints(data['score']);
+              setStreak(data['streak']);
+            });
           setNavigation('Login');
         },
         error=>{
