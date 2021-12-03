@@ -115,6 +115,8 @@ export default function App() {
           console.log(username);
           console.log(error);
         }
+
+        
       );
 
     } catch (error) {
@@ -141,7 +143,7 @@ export default function App() {
   \*************************/
   function buttonActive() {
     setActive(true);
-    setTimeout(() => { setActive(false); }, 60000);
+    setTimeout(() => { setActive(false); }, 100000);
   }
 
 
@@ -296,6 +298,6 @@ const buttonStyle = StyleSheet.create({
     backgroundColor: '#ff0000',
   },
   disabled: {
-    backgroundColor: '#db0000',
+    backgroundColor: '#910000',
   },
 });
