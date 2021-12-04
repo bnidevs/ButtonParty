@@ -77,9 +77,12 @@ def add_new_users():
 
         try:
             add_user_to_RDS(username)
+        except Exception as err:
+            print(f'User {username} already created')
+        try:
             subscribe_endpoint_to_topic( add_platform_app_endpoint(token) )
         except Exception as err:
-            print(f'Unable to add user: {username}\n', err)
+            print(f'Unable to add endpoint')
 
     # Delete messages
     try:

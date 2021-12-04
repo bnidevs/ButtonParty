@@ -14,9 +14,6 @@ from powerups import check_for_powerup_purchases
 from sns import send_message_to_SNS
 from helper import validateJson
 
-MAX_EXTENDER_PERIOD = 5
-timestamp_button_limit = None
-
 def call_events():
     print('Button Activated')
     # Extra Catch to make sure the streaks are set to 0
@@ -37,23 +34,12 @@ def run_button_game():
             call_events()
             time.sleep(60)
 
-def reset_timestamp():
-    global timestamp_button_limit
-    if(timestamp_button_limit == None):
-        return
-    now = time.time() * 1000
-    time_passed = ( now - timestamp_button_limit ) / 1000
-    if(time_passed >= TIME_TO_PRESS * MAX_EXTENDER_PERIOD):
-        timestamp_button_limit = None
-
 def get_timestamp():
-    global timestamp_button_limit
-    if(timestamp_button_limit == None):
-        try:
-            message = receive_messages_from_SQS( SQS_TIMESTAMP_QUEUE_URL )[0]
-            timestamp_button_limit = int(message['Attributes']['SentTimestamp'])
-        except Exception as err:
-            timestamp_button_limit = None
+    try:
+        message = receive_messages_from_SQS( SQS_TIMESTAMP_QUEUE_URL )[0]
+        timestamp_button_limit = int(message['Attributes']['SentTimestamp'])
+    except Exception as err:
+        timestamp_button_limit = None
     return timestamp_button_limit
 
 def is_valid_timestamp( timestamp_from_request, extender ):
@@ -106,7 +92,6 @@ def remove_duplicates(messages):
     return r
 
 def check_the_pressed_buttons():
-    reset_timestamp()
     messages = remove_duplicates(receive_messages_from_SQS( SQS_SCORING_QUEUE_URL ))
     if(len(messages) == 0):
         return False
@@ -125,9 +110,11 @@ def check_the_pressed_buttons():
 
 if __name__ == '__main__':
     print("1 - Check for all 3 SQS requests (users, presses, powerups)")
-    print("2 - Run check for pressed button")
-    print("3 - Run the random button press")
-    print("4 - Force Button press")
+    print("2 - Check for users")
+    print("3 - Check for pressed")
+    print("4 - Check for powerups")
+    print("5 - Run game (random time)")
+    print("6 - Force button press")
     num = int(sys.argv[1])
     if( num == 1 ):
         while(True):
@@ -136,11 +123,17 @@ if __name__ == '__main__':
             check_for_powerup_purchases()
     elif( num == 2 ):
         while(True):
-            check_the_pressed_buttons()
+            add_new_users()
     elif( num == 3 ):
         while(True):
-            run_button_game();
+            check_the_pressed_buttons()
     elif( num == 4 ):
+        while(True):
+            check_for_powerup_purchases()
+    elif( num == 5 ):
+        while(True):
+            run_button_game();
+    elif( num == 6 ):
         call_events()
     else:
         print("Invalid Input")
