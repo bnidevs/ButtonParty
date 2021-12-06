@@ -74,7 +74,7 @@ API calls are done via `fetch`. User IDs are stored in `AsyncStorage`.
 ### AWS Details
 See [`cftemplate.json`](https://github.com/bnidevs/ButtonParty/blob/main/cftemplate.json) (CloudFormation template) for more configuration details
 
-:warning: **Warning: `cftemplate.json` has not been updated with every necessary resource, refer to diagram for accurate services**
+:warning: **Warning: `cftemplate.json` may not be updated with every necessary resource, refer to diagram for accurate services**
 
 #### API Gateway
 The API Gateway is set up with 4 routes:
