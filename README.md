@@ -2,6 +2,8 @@
 
 Alex Pinkowski, Bill Ni, Brandon George, Sage Charity Griffiths
 
+:warning: **Warning: AWS Services have been closed, APK will no longer respond with proper values or responses**
+
 ## Game Logic
 
 Players are given a single button which will light up at random times throughout the day.
